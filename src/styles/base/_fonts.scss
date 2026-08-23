@@ -1,0 +1,33 @@
+// Helvetica Neue LT Pro — self-hosted from /public/static/fonts.
+// Only the normal-width cuts are registered; condensed/extended/outline
+// variants exist in the folder but aren't used by the app.
+// Note: the family has no 600 weight, so font-weight: 600 resolves to Bold (700).
+
+$font-path: "/static/fonts/HelveticaNeueLTPro";
+
+@mixin helvetica-face($file, $weight, $style: normal) {
+  @font-face {
+    font-family: "Helvetica Neue LT Pro";
+    src: url("#{$font-path}/HelveticaNeueLTPro-#{$file}.otf") format("opentype");
+    font-weight: $weight;
+    font-style: $style;
+    font-display: swap;
+  }
+}
+
+@include helvetica-face("UltLt", 100);
+@include helvetica-face("UltLtIt", 100, italic);
+@include helvetica-face("Th", 200);
+@include helvetica-face("ThIt", 200, italic);
+@include helvetica-face("Lt", 300);
+@include helvetica-face("LtIt", 300, italic);
+@include helvetica-face("Roman", 400);
+@include helvetica-face("It", 400, italic);
+@include helvetica-face("Md", 500);
+@include helvetica-face("MdIt", 500, italic);
+@include helvetica-face("Bd", 700);
+@include helvetica-face("BdIt", 700, italic);
+@include helvetica-face("Hv", 800);
+@include helvetica-face("HvIt", 800, italic);
+@include helvetica-face("Blk", 900);
+@include helvetica-face("BlkIt", 900, italic);

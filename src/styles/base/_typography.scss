@@ -1,0 +1,108 @@
+:root {
+  /* Typography */
+  --font-primary:
+    "Helvetica Neue LT Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-body: var(--font-primary);
+  --font-display: var(--font-primary); // used by the Heading component
+
+  // Colors
+  --text-clr: var(--clr-gray-dark);
+  --text-clr-muted: rgba(255, 255, 255, 0.45);
+
+  --text-clr-success: rgb(176, 209, 172);
+  --text-clr-pending: rgba(224, 167, 82, 1);
+  --text-clr-error: rgba(188, 82, 95, 1);
+
+  // base font size
+  --fs-base: 1rem;
+
+  // heading font sizes
+  --fs-h1: 1.5rem; // 24px
+  --fs-h2: 1.125rem; // 18px
+  --fs-h3: 1.125rem; // 18px
+  --fs-h4: 1rem; // 16px
+  --fs-h5: 0.875rem; // 14px
+  --fs-h6: 0.75rem; // 12px
+
+  // font weights
+  --fw-thin: 300;
+  --fw-normal: 400;
+  --fw-medium: 500; // Added for the login page "terms of use", based on figma.
+  --fw-semi-bold: 600;
+
+  // line heights
+  --lh-hecto: 1.6667;
+  --lh-deca: 1.57;
+  --lh-base: 1.5;
+  --lh-deci: 1.2;
+  --lh-centi: 1;
+
+  // letter spacing
+  --ls-base: 0.0175rem;
+
+  // styles
+  font-optical-sizing: auto;
+  font-family: var(--font-primary);
+  font-weight: var(--fw-thin);
+  color: var(--text-clr);
+}
+
+a {
+  color: var(--clr-text);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+    color: var(--text-clr-secondary);
+  }
+}
+
+p {
+  font-size: var(--font-size-3);
+  line-height: var(--line-height, var(--default-line-height));
+  letter-spacing: var(--letter-spacing, inherit);
+}
+
+strong,
+b {
+  font-weight: var(--font-weight-bold);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  --leading-trim-start: var(--heading-leading-trim-start);
+  --leading-trim-end: var(--heading-leading-trim-end);
+  font-family: var(--heading-font-family);
+  font-style: var(--heading-font-style);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height);
+  margin: 1rem 0 0.25rem 0;
+}
+
+h1 {
+  font-size: calc(var(--font-size-5) * var(--heading-font-size-adjust));
+  --line-height: var(--heading-line-height-5);
+  letter-spacing: calc(var(--letter-spacing-5) + var(--heading-letter-spacing));
+}
+
+h2 {
+  font-size: calc(var(--font-size-4) * var(--heading-font-size-adjust));
+  --line-height: var(--heading-line-height-4);
+  letter-spacing: calc(var(--letter-spacing-4) + var(--heading-letter-spacing));
+}
+
+h3 {
+  font-size: calc(var(--font-size-3) * var(--heading-font-size-adjust));
+  --line-height: var(--heading-line-height-3);
+  letter-spacing: calc(var(--letter-spacing-3) + var(--heading-letter-spacing));
+}
+
+h4 {
+  font-size: calc(var(--font-size-2) * var(--heading-font-size-adjust));
+  --line-height: var(--heading-line-height-2);
+  letter-spacing: calc(var(--letter-spacing-2) + var(--heading-letter-spacing));
+}

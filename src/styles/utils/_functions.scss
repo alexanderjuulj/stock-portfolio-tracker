@@ -1,0 +1,57 @@
+/* =Global Media Queries
+------------------------------ */
+// Very small devices (portrait phones, 320px and down)
+$breakpoint-mobile-xs: "(max-width: 20em)";
+// @media #{$breakpoint-mobile-xs}
+
+// Small devices (portrait phones, 428px and down)
+$breakpoint-mobile-portrait: "(max-width: 26.75em)";
+// @media #{$breakpoint-mobile-portrait}
+
+// Small devices (landscape phones, 576px and down)
+$breakpoint-mobile-landscape: "(max-width: 36em)";
+// @media #{$breakpoint-mobile-landscape}
+
+// Medium devices (portrait tablets, 768px and down)
+$breakpoint-tablet-portrait: "(max-width: 48em)";
+// @media #{$breakpoint-tablet-portrait}
+
+// Medium devices (landscape tablets, 1024px and down)
+$breakpoint-tablet-landscape: "(max-width: 63.99em)";
+// @media #{$breakpoint-tablet-landscape}
+
+// Large devices (desktops, 992px and down)
+$breakpoint-large: "(max-width: 62em)";
+// @media #{$breakpoint-large}
+
+// Extra large devices (desktops, 1200px and down)
+$breakpoint-xlarge: "(max-width: 74.99em)";
+// @media #{$breakpoint-xlarge}
+
+// Extra large devices (large desktops, 1400px and down)
+$breakpoint-xxlarge: "(max-width: 87.5em)";
+// @media #{$breakpoint-xxlarge}
+
+//  large desktop devices (large desktops, 1536px and down) its used in challenge classes for grid layout in single challenge page
+$breakpoint-large-desktop: "(max-width: 96em)";
+// @media #{$breakpoint-large-desktop}
+
+/* =Min-width breakpoints
+------------------------------ */
+// Mirrors the JS scale in `src/lib/layoutProps.ts`, so the
+// `{ initial, sm, md, … }` props on Box/Flex/Grid and the media queries in
+// SCSS break at the same widths.
+$xs: "(min-width: 520px)";
+// @media #{$xs}
+
+$sm: "(min-width: 768px)";
+// @media #{$sm}
+
+$md: "(min-width: 1024px)";
+// @media #{$md}
+
+$lg: "(min-width: 1280px)";
+// @media #{$lg}
+
+$xl: "(min-width: 1640px)";
+// @media #{$xl}

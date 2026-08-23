@@ -1,0 +1,53 @@
+@use "@/styles/utils/form" as *;
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(76, 92, 101, 0.6); // --clr-gray-dark at 60%
+}
+
+.dialog {
+  width: 100%;
+  max-width: 400px;
+  background: var(--clr-white);
+  padding: 24px;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: black;
+}
+
+.message {
+  font-size: 1rem;
+  color: var(--clr-gray-dark);
+}
+
+.actions {
+  margin-top: 8px;
+}
+
+.cancel {
+  @include button-ghost;
+  padding: 1rem;
+  text-box: trim-both cap alphabetic;
+}
+
+.confirm {
+  @include button-primary;
+}
+
+.confirmDanger {
+  @include button-primary;
+  background: var(--text-clr-error);
+
+  &:hover:not(:disabled) {
+    background: #a34452;
+  }
+}

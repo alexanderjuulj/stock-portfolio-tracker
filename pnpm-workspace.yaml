@@ -1,0 +1,9 @@
+# Not a monorepo — this file is where pnpm 11 keeps install settings.
+#
+# @parcel/watcher (pulled in by sass, for `sass --watch`) ships a native
+# build script. Nothing here needs it: Vite drives sass through
+# sass-embedded and brings its own file watcher. Without an explicit
+# decision, a fresh install exits 1 with ERR_PNPM_IGNORED_BUILDS, which
+# is what broke CI.
+allowBuilds:
+  '@parcel/watcher': false
