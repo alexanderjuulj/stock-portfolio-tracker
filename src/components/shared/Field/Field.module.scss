@@ -1,0 +1,35 @@
+@use "@/styles/utils/form" as *;
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.label {
+  @include field-label;
+}
+
+.hint {
+  font-size: 0.8125rem;
+  color: var(--clr-gray-light);
+}
+
+.input {
+  @include field;
+}
+
+.select {
+  @include select-field;
+}
+
+.textarea {
+  @include field;
+  resize: vertical;
+  min-height: 72px;
+}

@@ -1,7 +1,15 @@
 import fs from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { createAccount, deleteAccount, parseAccountInput, updateAccount } from "./accounts";
 import { DB_PATH, exportSnapshot, getDb, importSnapshot, schemaVersion } from "./db";
-import type { HealthResponse } from "../src/types/api";
+import { buildHistory } from "./history";
+import { createHolding, deleteHolding, parseHoldingInput, updateHolding } from "./holdings";
+import { buildPortfolio } from "./portfolio";
+import { getQuoteProvider } from "./quotes";
+import { createSale, deleteSale, parseSaleInput, updateSale } from "./sales";
+import { getSetting, setSetting } from "./settings";
+import { deleteStock, normalizeTicker, parseStockInput, updateStock } from "./stocks";
+import type { AppSettings, HealthResponse } from "../src/types/api";
 
 // Uploads larger than this are rejected — far beyond any plausible portfolio DB.
 const MAX_IMPORT_BYTES = 100 * 1024 * 1024;
@@ -28,6 +36,39 @@ function readBody(req: IncomingMessage): Promise<Buffer> {
     req.on("end", () => resolve(Buffer.concat(chunks)));
     req.on("error", reject);
   });
+}
+
+function errorMessage(err: unknown): string {
+  return err instanceof Error ? err.message : String(err);
+}
+
+async function readJsonBody(req: IncomingMessage): Promise<unknown> {
+  const body = await readBody(req);
+  if (body.length === 0) throw new Error("Empty body — send a JSON object");
+  try {
+    return JSON.parse(body.toString("utf8")) as unknown;
+  } catch {
+    throw new Error("Body is not valid JSON");
+  }
+}
+
+function parseSettingsInput(body: unknown): AppSettings {
+  if (typeof body !== "object" || body === null) throw new Error("Expected a JSON object");
+  const b = body as Record<string, unknown>;
+  if (b.provider !== "yahoo" && b.provider !== "finnhub") {
+    throw new Error('Unknown provider — expected "yahoo" or "finnhub"');
+  }
+  return {
+    provider: b.provider,
+    finnhubApiKey: typeof b.finnhubApiKey === "string" ? b.finnhubApiKey.trim() : "",
+  };
+}
+
+function currentSettings(): AppSettings {
+  return {
+    provider: getQuoteProvider(),
+    finnhubApiKey: getSetting("finnhub_api_key") ?? "",
+  };
 }
 
 function health(): HealthResponse {
@@ -80,8 +121,167 @@ export async function handleApiRequest(
       return;
     }
 
+    const query = new URLSearchParams((req.url ?? "").split("?")[1] ?? "");
+    const accountParam = query.get("account");
+    const accountScope =
+      accountParam !== null && /^\d+$/.test(accountParam) ? Number(accountParam) : null;
+
+    if (req.method === "GET" && url === "/portfolio") {
+      sendJson(
+        res,
+        200,
+        await buildPortfolio({ force: query.get("refresh") === "1", accountId: accountScope }),
+      );
+      return;
+    }
+
+    if (req.method === "GET" && url === "/history") {
+      sendJson(res, 200, await buildHistory(accountScope));
+      return;
+    }
+
+    // ── Holdings (lots) ──────────────────────────────────────────────────
+    // Validation, "account not found" and ledger conflicts are caller
+    // mistakes → 400.
+
+    if (req.method === "POST" && url === "/holdings") {
+      try {
+        sendJson(res, 201, createHolding(parseHoldingInput(await readJsonBody(req))));
+      } catch (err) {
+        sendJson(res, 400, { error: errorMessage(err) });
+      }
+      return;
+    }
+
+    const holdingRoute = url.match(/^\/holdings\/(\d+)$/);
+    if (holdingRoute && req.method === "DELETE") {
+      const id = Number(holdingRoute[1]);
+      try {
+        if (deleteHolding(id)) sendJson(res, 200, { ok: true });
+        else sendJson(res, 404, { error: `No holding with id ${id}` });
+      } catch (err) {
+        sendJson(res, 400, { error: errorMessage(err) });
+      }
+      return;
+    }
+
+    if (holdingRoute && req.method === "PUT") {
+      const id = Number(holdingRoute[1]);
+      try {
+        const updated = updateHolding(id, parseHoldingInput(await readJsonBody(req)));
+        if (updated) sendJson(res, 200, updated);
+        else sendJson(res, 404, { error: `No holding with id ${id}` });
+      } catch (err) {
+        sendJson(res, 400, { error: errorMessage(err) });
+      }
+      return;
+    }
+
+    // ── Sales ────────────────────────────────────────────────────────────
+
+    if (req.method === "POST" && url === "/sales") {
+      try {
+        sendJson(res, 201, await createSale(parseSaleInput(await readJsonBody(req))));
+      } catch (err) {
+        sendJson(res, 400, { error: errorMessage(err) });
+      }
+      return;
+    }
+
+    const saleRoute = url.match(/^\/sales\/(\d+)$/);
+    if (saleRoute && req.method === "PUT") {
+      const id = Number(saleRoute[1]);
+      try {
+        const updated = await updateSale(id, parseSaleInput(await readJsonBody(req)));
+        if (updated) sendJson(res, 200, updated);
+        else sendJson(res, 404, { error: `No sale with id ${id}` });
+      } catch (err) {
+        sendJson(res, 400, { error: errorMessage(err) });
+      }
+      return;
+    }
+
+    if (saleRoute && req.method === "DELETE") {
+      const id = Number(saleRoute[1]);
+      if (deleteSale(id)) sendJson(res, 200, { ok: true });
+      else sendJson(res, 404, { error: `No sale with id ${id}` });
+      return;
+    }
+
+    // ── Stocks (per-ticker fields) ───────────────────────────────────────
+
+    const stockRoute = url.match(/^\/stocks\/([^/]+)$/);
+    if (stockRoute && req.method === "PUT") {
+      const ticker = normalizeTicker(decodeURIComponent(stockRoute[1]));
+      try {
+        const updated = updateStock(ticker, parseStockInput(await readJsonBody(req)));
+        if (updated) sendJson(res, 200, updated);
+        else sendJson(res, 404, { error: `No stock ${ticker}` });
+      } catch (err) {
+        sendJson(res, 400, { error: errorMessage(err) });
+      }
+      return;
+    }
+
+    if (stockRoute && req.method === "DELETE") {
+      const ticker = normalizeTicker(decodeURIComponent(stockRoute[1]));
+      if (deleteStock(ticker)) sendJson(res, 200, { ok: true });
+      else sendJson(res, 404, { error: `No stock ${ticker}` });
+      return;
+    }
+
+    // ── Accounts ─────────────────────────────────────────────────────────
+
+    if (req.method === "POST" && url === "/accounts") {
+      try {
+        sendJson(res, 201, createAccount(parseAccountInput(await readJsonBody(req))));
+      } catch (err) {
+        sendJson(res, 400, { error: errorMessage(err) });
+      }
+      return;
+    }
+
+    const accountRoute = url.match(/^\/accounts\/(\d+)$/);
+    if (accountRoute && req.method === "PUT") {
+      const id = Number(accountRoute[1]);
+      try {
+        const updated = updateAccount(id, parseAccountInput(await readJsonBody(req)));
+        if (updated) sendJson(res, 200, updated);
+        else sendJson(res, 404, { error: `No account with id ${id}` });
+      } catch (err) {
+        sendJson(res, 400, { error: errorMessage(err) });
+      }
+      return;
+    }
+
+    if (accountRoute && req.method === "DELETE") {
+      const id = Number(accountRoute[1]);
+      if (deleteAccount(id)) sendJson(res, 200, { ok: true });
+      else sendJson(res, 404, { error: `No account with id ${id}` });
+      return;
+    }
+
+    if (req.method === "GET" && url === "/settings") {
+      sendJson(res, 200, currentSettings());
+      return;
+    }
+
+    if (req.method === "PUT" && url === "/settings") {
+      let input: AppSettings;
+      try {
+        input = parseSettingsInput(await readJsonBody(req));
+      } catch (err) {
+        sendJson(res, 400, { error: errorMessage(err) });
+        return;
+      }
+      setSetting("quote_provider", input.provider);
+      setSetting("finnhub_api_key", input.finnhubApiKey);
+      sendJson(res, 200, currentSettings());
+      return;
+    }
+
     sendJson(res, 404, { error: `No route: ${req.method} /api${url}` });
   } catch (err) {
-    sendJson(res, 500, { error: err instanceof Error ? err.message : String(err) });
+    sendJson(res, 500, { error: errorMessage(err) });
   }
 }

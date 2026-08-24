@@ -1,3 +1,3 @@
-// Aggregates all feature barrels. Add a line per feature as they land, e.g.:
-// export * from "./portfolio";
-export {};
+// Aggregates all feature barrels. Add a line per feature as they land.
+export * from "./portfolio";
+export * from "./settings";

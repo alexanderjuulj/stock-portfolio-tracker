@@ -1,0 +1,122 @@
+@use "@/styles/utils/form" as *;
+
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 48px 32px 96px;
+}
+
+.kicker {
+  @include kicker;
+}
+
+.heading {
+  @include page-heading;
+  margin: 8px 0 0;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.sectionTitle {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: black;
+}
+
+.sectionText {
+  font-size: 0.9375rem;
+  color: var(--clr-gray-dark);
+}
+
+.providerCard {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 16px;
+  background: var(--background-color-secondary);
+  border: 2px solid transparent;
+  cursor: pointer;
+}
+
+.providerActive {
+  border-color: var(--clr-accent);
+}
+
+.radio {
+  margin-top: 3px;
+  accent-color: var(--clr-accent);
+}
+
+.providerName {
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--clr-gray-dark);
+}
+
+.providerNote {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.875rem;
+  color: var(--clr-gray-light);
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  @include field-label;
+}
+
+.input {
+  @include field;
+}
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.primaryButton {
+  @include button-primary;
+  padding: 13px 20px;
+  font-size: 0.9375rem;
+}
+
+.ghostButton {
+  @include button-ghost;
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 18px;
+  font-size: 0.875rem;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: none;
+    color: var(--clr-gray-dark);
+  }
+}
+
+.savedNote {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--clr-accent);
+}
+
+.muted {
+  @include muted-text;
+  margin-top: 32px;
+}
+
+.error {
+  @include error-text;
+}

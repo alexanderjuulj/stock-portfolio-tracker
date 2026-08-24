@@ -1,0 +1,229 @@
+.wrapper {
+  overflow-x: auto;
+}
+
+// Text colors live on the row containers (not on td) so the per-cell
+// .pos/.neg classes below can override them.
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--clr-gray-dark);
+}
+
+.table thead th {
+  padding: 0 8px 10px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--clr-gray-light);
+  text-align: left;
+  border-bottom: 1px solid var(--clr-gray-light);
+}
+
+.table tbody td {
+  padding: 12px 8px;
+  font-size: 0.875rem;
+  font-weight: 400;
+  border-bottom: 1px solid var(--background-color-secondary);
+  vertical-align: top;
+}
+
+.table tbody tr:hover {
+  background: var(--background-color-secondary);
+}
+
+.table tfoot {
+  color: black;
+}
+
+.table tfoot td {
+  padding: 12px 8px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  border-top: 2px solid var(--clr-gray-dark);
+}
+
+.num {
+  text-align: right;
+}
+
+// Expand/collapse control in the first cell.
+.toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: -4px;
+  padding: 0 4px;
+  border: none;
+  background: none;
+  font: inherit;
+  color: black;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 2px solid var(--clr-accent);
+    outline-offset: 2px;
+  }
+}
+
+.caret {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid var(--clr-gray-light);
+  border-bottom: 1.5px solid var(--clr-gray-light);
+  transform: translateY(-1px) rotate(-45deg);
+  transition: transform 0.15s ease;
+}
+
+.caretOpen {
+  transform: translateY(-2px) rotate(45deg);
+}
+
+.ticker {
+  font-weight: 700;
+}
+
+.name {
+  display: block;
+  max-width: 180px;
+  margin-left: 19px; // align under the ticker, past the caret
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 0.75rem;
+  color: var(--clr-gray-light);
+}
+
+.lotsCaption {
+  display: block;
+  margin-left: 19px;
+  font-size: 0.75rem;
+  color: var(--clr-accent);
+}
+
+.strong {
+  font-weight: 600;
+}
+
+.pos {
+  color: var(--clr-accent);
+}
+
+.neg {
+  color: var(--text-clr-error);
+}
+
+.stale {
+  margin-left: 6px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-clr-pending);
+}
+
+// The weight column doubles as a miniature bar chart of portfolio share.
+.weightBar {
+  display: block;
+  width: 64px;
+  height: 3px;
+  margin: 6px 0 0 auto;
+  background: var(--background-color-secondary);
+}
+
+.weightFill {
+  display: block;
+  height: 100%;
+  background: var(--clr-accent);
+}
+
+.sector {
+  display: block;
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notes {
+  display: block;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+// Per-account lot rows shown under an expanded position.
+.lotRow td {
+  padding-top: 10px;
+  padding-bottom: 10px;
+  font-size: 0.8125rem;
+  background: #f8f9fa;
+}
+
+.table tbody tr.lotRow:hover {
+  background: #f8f9fa;
+}
+
+.lotCell {
+  padding-left: 27px;
+}
+
+.lotAccount {
+  display: block;
+  font-weight: 600;
+  color: var(--clr-gray-dark);
+}
+
+.lotDate {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--clr-gray-light);
+}
+
+// Pinned to the right edge so the actions stay reachable when the table
+// scrolls horizontally on narrower screens.
+.actionsCell {
+  position: sticky;
+  right: 0;
+  background: var(--clr-white);
+  text-align: right;
+}
+
+.table tbody tr:hover .actionsCell {
+  background: var(--background-color-secondary);
+}
+
+.lotActions,
+.table tbody tr.lotRow:hover .lotActions {
+  background: #f8f9fa;
+}
+
+.action {
+  border: none;
+  background: none;
+  padding: 2px 6px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--clr-gray-light);
+  cursor: pointer;
+
+  &:hover {
+    color: var(--clr-gray-dark);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--clr-accent);
+    outline-offset: 0;
+  }
+}
+
+.actionSell:hover {
+  color: var(--clr-accent);
+}
+
+.actionDanger:hover {
+  color: var(--text-clr-error);
+}

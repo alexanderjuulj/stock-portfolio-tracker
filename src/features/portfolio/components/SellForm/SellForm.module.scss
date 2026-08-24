@@ -1,0 +1,60 @@
+.static {
+  display: block;
+  padding: 14px 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--clr-gray-dark);
+}
+
+.checkbox {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9375rem;
+  color: var(--clr-gray-dark);
+  cursor: pointer;
+
+  input {
+    margin-top: 4px;
+    accent-color: var(--clr-accent);
+  }
+}
+
+.checkboxNote {
+  color: var(--clr-gray-light);
+}
+
+// Live FIFO preview of what the sale realizes.
+.preview {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: var(--background-color-secondary);
+  font-size: 0.9375rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--clr-gray-dark);
+}
+
+.previewRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.previewTotal {
+  padding-top: 8px;
+  border-top: 1px solid var(--clr-gray-light);
+  font-weight: 700;
+  color: black;
+}
+
+.pos {
+  color: var(--clr-accent);
+}
+
+.neg {
+  color: var(--text-clr-error);
+}

@@ -1,7 +1,9 @@
 :root {
   /* Typography */
+  // Poppins is loaded from Google Fonts (index.html); the self-hosted
+  // Helvetica Neue LT Pro stays registered as the offline fallback.
   --font-primary:
-    "Helvetica Neue LT Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    "Poppins", "Helvetica Neue LT Pro", "Helvetica Neue", Helvetica, Arial, sans-serif;
   --font-body: var(--font-primary);
   --font-display: var(--font-primary); // used by the Heading component
 

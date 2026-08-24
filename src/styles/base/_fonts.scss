@@ -1,6 +1,7 @@
 // Helvetica Neue LT Pro — self-hosted from /public/static/fonts.
-// Only the normal-width cuts are registered; condensed/extended/outline
-// variants exist in the folder but aren't used by the app.
+// Since the switch to Poppins (Google Fonts, see index.html) this family is
+// only the fallback in --font-primary, so browsers fetch it only when Poppins
+// can't load (e.g. offline). Only the normal-width cuts are registered.
 // Note: the family has no 600 weight, so font-weight: 600 resolves to Bold (700).
 
 $font-path: "/static/fonts/HelveticaNeueLTPro";

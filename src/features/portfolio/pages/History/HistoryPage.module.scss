@@ -1,0 +1,111 @@
+@use "@/styles/utils/form" as *;
+
+.page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 48px 32px 96px;
+}
+
+.kicker {
+  @include kicker;
+}
+
+.heading {
+  @include page-heading;
+  margin: 8px 0 4px;
+}
+
+.subline {
+  font-size: 0.875rem;
+  color: var(--clr-gray-light);
+}
+
+.tabs {
+  margin-top: 32px;
+}
+
+.tile {
+  background: var(--background-color-secondary);
+  padding: 20px;
+}
+
+.tileLabel {
+  display: block;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--clr-gray-light);
+}
+
+.tileValue {
+  display: block;
+  margin-top: 10px;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: black;
+  font-variant-numeric: tabular-nums;
+}
+
+.pos {
+  color: var(--clr-accent);
+}
+
+.neg {
+  color: var(--text-clr-error);
+}
+
+.notice {
+  margin-top: 24px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--text-clr-pending);
+  background: var(--background-color-secondary);
+}
+
+.noticeLine {
+  font-size: 0.875rem;
+  color: var(--clr-gray-dark);
+}
+
+.section {
+  margin-top: 40px;
+}
+
+.sectionTitle {
+  margin: 4px 0 16px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: black;
+}
+
+.stateText {
+  margin-top: 40px;
+  font-size: 1rem;
+  color: var(--clr-gray-light);
+}
+
+.primaryButton {
+  @include button-primary;
+  padding: 13px 20px;
+  font-size: 0.9375rem;
+}
+
+.empty {
+  margin-top: 40px;
+  padding: 64px 32px;
+  background: var(--background-color-secondary);
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: black;
+}
+
+.emptyText {
+  margin: 8px auto 0;
+  max-width: 420px;
+  font-size: 0.9375rem;
+  color: var(--clr-gray-dark);
+}

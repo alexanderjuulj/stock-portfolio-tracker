@@ -4,9 +4,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**Rahamasin** — a stock portfolio tracker web app that runs **locally only**: started with `pnpm dev`, never deployed. Data lives in a SQLite file (`data/rahamasin.db`, gitignored) that can be exported and imported through the API; there is no separate backend process and no cloud dependency. (Domain features are not built yet — details are coming.)
+**Rahamasin** — a stock portfolio tracker web app that runs **locally only**: started with `pnpm dev`, never deployed. Data lives in a SQLite file (`data/rahamasin.db`, gitignored) that can be exported and imported through the API; there is no separate backend process and no cloud dependency.
 
-The repo started as a clean-out of a previous React project: all Supabase code and the old app's domain features were removed, but the scaffold — folder conventions, layout primitives, SCSS architecture, tooling — was kept and is documented below. `src/App.tsx` currently renders a placeholder home page that shows DB health.
+Features so far: a **dashboard** (`/`) with one row per stock — amount summed across accounts, average buy price, live market price, profit (abs + %), market value (native + EUR), portfolio weight, sector, personal notes — that expands into the per-account purchase lots (with dates), plus totals (open and realized profit), account filter tabs, **selling** (pick the account, amount, price prefilled from the quote, date, reason; proceeds can be credited to the account's free cash), and an **Accounts** section showing free cash per account (native + EUR), stocks value and total, with an all-accounts total; a **history page** (`/history`) listing every purchase and sale with its realized profit/loss and a per-stock×account summary; and a **settings page** (`/settings`) for the quote provider / API key and DB backup import/export. See "Data model", "Ledger" and "Market data" under Data layer.
+
+The repo started as a clean-out of a previous React project: all Supabase code and the old app's domain features were removed, but the scaffold — folder conventions, layout primitives, SCSS architecture, tooling — was kept and is documented below.
 
 Stack: React 19 + Vite + TypeScript + SCSS, `react-router-dom` for routing, `motion` for animation, Node's built-in `node:sqlite` for storage (requires Node ≥ 22.13; zero DB dependencies, no native compilation). pnpm only — no npm/yarn.
 
@@ -26,22 +28,32 @@ public/
   static/fonts/HelveticaNeueLTPro/   # self-hosted brand font (.otf, all cuts)
 server/              # the API — Node code run inside Vite's server, not bundled
   plugin.ts          # Vite plugin mounting the API middleware on /api (dev + preview)
-  api.ts             # route handlers (health, export, import, + feature routes)
+  api.ts             # route handlers: health, export, import, portfolio, history, holdings, sales, stocks, accounts, settings
   db.ts              # opens/migrates the DB; export/import snapshot helpers
   migrations.ts      # append-only ordered SQL migrations (user_version-based)
+  accounts.ts        # accounts CRUD + validation
+  stocks.ts          # per-ticker stock records (sector/currency/notes), upsert + orphan cleanup
+  holdings.ts        # purchase lots CRUD + validation (lot = ticker × account), ledger-guarded
+  sales.ts           # sales CRUD + validation; cash credit in the account's currency
+  ledger.ts          # lists lots + sales; FIFO replay → open lots, settled sales (cost basis, realized P/L)
+  portfolio.ts       # joins ledger + stocks + accounts + quotes + FX into positions/accounts/totals
+  history.ts         # buys + sells with realized P/L, per stock × account summary
+  quotes.ts          # Yahoo/Finnhub quote fetchers, Frankfurter FX, SQLite caches
+  settings.ts        # key/value settings helpers (getSetting/setSetting)
 src/
-  App.tsx            # routes (BrowserRouter); placeholder home page for now
+  App.tsx            # AppHeader + routes: / (DashboardPage), /history (HistoryPage), /settings (SettingsPage)
   main.tsx           # entry: StrictMode + createRoot
   components/
     index.ts         # top-level barrel: re-exports ./ui and ./shared
     ui/              # layout/typography primitives (see below)
-    shared/          # cross-feature presentational pieces (ConfirmDialog)
-  features/          # one folder per app feature (empty — barrel stub only)
+    shared/          # cross-feature pieces: AppHeader, ConfirmDialog, FormDialog, Field (+ fieldClasses)
+  features/          # one folder per app feature: portfolio/, settings/
     index.ts         # aggregates all feature barrels
   lib/               # non-UI plumbing shared app-wide
-    api.ts           # apiGet/apiPost fetch wrappers for /api
+    api.ts           # apiGet/apiPost/apiPut/apiDelete fetch wrappers for /api
+    finance.ts       # CURRENCIES (Frankfurter-convertible ISO codes) and SECTORS (GICS) option lists
     layoutProps.ts   # responsive-prop engine for the ui primitives
-    utils.ts         # cn() classname joiner, formatPrice, slugify
+    utils.ts         # cn() classname joiner, formatPrice/formatSignedPrice/formatNumber/formatPercent/formatDate, slugify
   styles/            # global SCSS (see "Styling")
   types/
     api.ts           # request/response types shared by client and server
@@ -91,7 +103,7 @@ Radix-Themes-compatible layout primitives implemented locally, with no Radix dep
 - Spacing props (`p`, `m`, `gap`, …) take the Radix space scale `"1"`–`"9"` (0.25rem–4rem, defined in rem) or any raw CSS length.
 - Import from `@/components` (the top-level barrel), not `@/components/ui`.
 
-`src/components/shared/` holds cross-feature presentational pieces (currently `ConfirmDialog`); it re-exports through `@/components` too.
+`src/components/shared/` holds cross-feature presentational pieces, re-exported through `@/components` too: `AppHeader` (brand + Dashboard/Settings nav), `ConfirmDialog`, `FormDialog` (modal form shell: backdrop, title, error line, Cancel/Submit — mount it only while open so field state starts fresh) and `Field` (label + control + hint on the dialog's two-column grid; `full` spans both) with `fieldClasses` (`input`/`select`/`textarea` class names for the controls inside). Feature forms compose these and own only their field state.
 
 ## Data layer
 
@@ -99,7 +111,14 @@ Radix-Themes-compatible layout primitives implemented locally, with no Radix dep
 - **The API lives inside Vite** — `server/plugin.ts` mounts a connect middleware on `/api/*` in both `pnpm dev` and `pnpm preview`. There is deliberately no second process, port, or CORS setup; `pnpm dev` is the only command.
 - **Schema changes are migrations**: append a SQL string to `MIGRATIONS` in `server/migrations.ts` — never edit or reorder shipped entries, since `PRAGMA user_version` on existing DB files (and exported backups) records how many have run. Pending migrations run on boot and after an import, each in its own transaction.
 - **Import/export** are DB-file-level and already implemented: `GET /api/export` streams a consistent snapshot (`VACUUM INTO`, so WAL state is never missing) as a dated `.db` download; `POST /api/import` (raw bytes body) integrity-checks the upload before swapping it in, then migrates it forward. An invalid upload never touches the live DB.
-- **Request flow**: components → feature hooks → feature `api/` modules → `apiGet`/`apiPost` (`src/lib/api.ts`) → route handlers in `server/api.ts` → prepared statements against `getDb()`. Request/response types live in `src/types/api.ts`, imported by the server via relative path and by the client via `@/types/api`.
+- **Request flow**: components → feature hooks → feature `api/` modules → `apiGet`/`apiPost`/`apiPut`/`apiDelete` (`src/lib/api.ts`) → route handlers in `server/api.ts` → prepared statements against `getDb()`. Request/response types live in `src/types/api.ts`, imported by the server via relative path and by the client via `@/types/api`. Validation errors come back as 400 with `{ error }`; the client wrapper throws them as `Error(message)`.
+- **Data model** (migrations 002–003): `accounts` (name, cash currency, free cash) · `stocks` keyed by ticker (sector, fallback currency, personal notes — everything that is true of a ticker regardless of who holds it) · `holdings` = purchase **lots** (ticker → stocks, account_id → accounts, quantity *as bought*, purchase_price, purchased_at) · `sales` (ticker, account_id, quantity, price, currency + `eur_per_unit` snapshot, `cash_credited`, reason, sold_at). The same ticker may appear in many accounts and several times in one; the dashboard aggregates open lots per ticker (`PortfolioPosition`, with `lots[]` for the breakdown). Stock records are created with the first lot (`upsertStock`) and removed when the last lot goes (`deleteOrphanStocks`); saving a lot with `stock` fields updates the shared stock record. Deleting an account cascades to its lots and sales; deleting a stock removes its lots and sales (the UI confirms with counts).
+- **Ledger** (`server/ledger.ts`): lots and sales are the source of truth; what is still held and what each sale earned are *derived* by `replayLedger` — per account × ticker, events in date order (undated lots count as oldest, a purchase precedes a sale on the same day), each sale consuming the **oldest lots first (FIFO)**. Output: open lots (`remaining`) and settled sales (`costBasis`, `realizedPl`, `unmatchedQuantity`). Because it's derived, correcting an old purchase price re-computes later realized P/L. `assertLedgerConsistent` guards lot edits/deletes (400 if a sale would lose its purchase); `availableQuantity` guards new sales (can't sell more than held on that date). Realized P/L in EUR uses the sale-time `eur_per_unit` when known, else today's rate. Recording a sale with `creditCash` adds `quantity × price`, converted trading → account currency via the EUR rates, to the account's free cash and stores it as `cash_credited`; editing/deleting the sale applies the delta / takes it back.
+- **Routes**: `GET /api/portfolio[?refresh=1][&account=ID]` (positions per ticker + `accounts[]` summaries with cash and realized P/L in EUR + `stocks[]` catalog + scoped `totals` (stocks, cash, invested, open profit, realized) + `fxRates` + `errors[]`; `account` scopes positions/totals, `accounts`/`stocks` are always unscoped; `refresh=1` bypasses the quote/FX caches), `GET /api/history[?account=ID]` (buys + sells newest first with per-sale cost basis / realized P/L, realized per stock × account, totals), `POST /api/holdings`, `PUT|DELETE /api/holdings/:id`, `POST /api/sales`, `PUT|DELETE /api/sales/:id` (ticker/account fixed), `PUT|DELETE /api/stocks/:ticker`, `POST /api/accounts`, `PUT|DELETE /api/accounts/:id`, `GET|PUT /api/settings`, plus `health`, `export`, `import`.
+- **Market data** (`server/quotes.ts`): prices are fetched **server-side** and cached in the `quotes` table for 15 min; EUR rates come from Frankfurter (ECB reference rates, keyless) cached 12 h in `fx_rates`. Provider is the `quote_provider` setting — `yahoo` (default; unofficial `query1.finance.yahoo.com/v8/finance/chart/<symbol>` endpoint, no key, worldwide symbols like `NOVO-B.CO`, reports currency + name) or `finnhub` (official free tier, needs `finnhub_api_key` setting, US listings only, no currency in the response). A failed fetch falls back to the cached price flagged `quoteStale`, with a per-ticker message in `errors[]`; the rest of the portfolio still renders.
+- **Currency rule**: a stock's stored `currency` is only a fallback — when the quote reports a currency (Yahoo), that one is used for purchase prices, market price, profit and the EUR conversion (`currencyEffective` in the response). London `GBp` quotes are normalised to GBP. Account cash is converted with the same ECB rates. All derived numbers (profit, EUR values, weights, per-account and scoped totals) are computed in `server/portfolio.ts`; the client only formats.
+- **Typo-proof inputs**: the lot form suggests existing tickers (datalist) and prefills the stock's sector/currency/notes when a known ticker is typed; sector and currency are selects (`SectorSelect` = GICS + sectors already in use + "Other…", `CurrencySelect` = `CURRENCIES`). Decimal inputs accept `,` as well as `.`.
+- **Sell form** (`SellForm`): account select limited to accounts holding the stock (forced choice when more than one), amount capped at what that account holds, price prefilled from the quote, date defaulting to today, required reason, "add proceeds to free cash" with the converted amount, and a live FIFO preview (`fifoCost` mirrors the server's replay for the chosen account's lots). The same component edits a sale from the History page (`initial` set, `position` null).
 - The server code is typechecked by `tsconfig.node.json` (not the app config — no `@/` alias there) and gets Node globals in `eslint.config.js`.
 
 ## Styling
@@ -107,7 +126,7 @@ Radix-Themes-compatible layout primitives implemented locally, with no Radix dep
 - **Component styles**: co-located CSS modules (`<Name>.module.scss`). The `@/` alias works in SCSS `@use`.
 - **Global SCSS** in `src/styles/`, loaded once from `App.tsx` via `main.scss`, in this order: `utils/` (variables, functions/breakpoint helpers) → `base/` (fonts, global, reset, typography, colors) → `layout/`. `utils/_form.scss` holds shared form mixins for feature modules to `@use`.
 - Design tokens are CSS custom properties on `:root`: colors in `base/_colors.scss` (`--clr-accent` teal, grays, magenta), typography in `base/_typography.scss` (`--font-*`, `--fs-*`, `--fw-*`, `--lh-*`).
-- **Font**: Helvetica Neue LT Pro, self-hosted from `public/static/fonts/`, faces registered in `base/_fonts.scss` (normal-width cuts only; the family has no 600 weight — 600 resolves to 700). `index.html` preloads the Roman cut.
+- **Font**: Poppins (300–700) from Google Fonts, linked in `index.html`; `--font-primary` falls back to the self-hosted Helvetica Neue LT Pro (`public/static/fonts/`, faces in `base/_fonts.scss`, only fetched when Poppins can't load — e.g. offline; that family has no 600 weight). Poppins is wide: data tables use 0.875rem with 8px cell padding to fit 12 columns at 1440px.
 - **Animation** uses the `motion` package — import from `motion/react`, never `framer-motion`.
 
 ## Gotchas
@@ -116,3 +135,5 @@ Radix-Themes-compatible layout primitives implemented locally, with no Radix dep
 - Sass drops empty rules — and their CSS-module class mappings with them — so every module class needs at least one declaration.
 - `pnpm-workspace.yaml` is not a monorepo marker; it's where pnpm 11 keeps install settings (`@parcel/watcher` build script deliberately disabled — Vite drives sass through `sass-embedded`).
 - Path alias `@/` → `src/` (defined in both `vite.config.ts` and `tsconfig.app.json`).
+- ESLint's `react-hooks/set-state-in-effect` rule is on: don't call setState (or a function that does) synchronously inside `useEffect`. Seed state from props at mount (mount the component only when its data exists — see `HoldingForm` / `MarketDataForm`) or keep setState inside promise callbacks (see `usePortfolio`).
+- Editing files under `server/` restarts the Vite dev server (they're imported by `vite.config.ts`); the DB connection and caches survive in SQLite, so nothing is lost.
