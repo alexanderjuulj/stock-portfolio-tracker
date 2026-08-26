@@ -29,16 +29,33 @@ export function cn(...inputs: ClassValue[]): string {
   return classes.join(' ')
 }
 
+import { isPrivate } from './privacy'
+
 // Figures use a narrow no-break space (U+202F) between thousands and a dot
 // for decimals, whatever the locale would do: 5 123.33 €. `et-EE` gives the
 // "amount + space + currency" order and always-on grouping; the separators
 // themselves are swapped in via formatToParts.
 const GROUP = '\u202f'
 const DECIMAL = '.'
+// Stands in for the digits while "hide figures" is on (src/lib/privacy.ts):
+// a fixed width so the magnitude doesn't leak; sign and currency are kept.
+const MASK = '•••••'
+const DIGIT_PARTS = new Set(['integer', 'group', 'decimal', 'fraction'])
 
-function formatWithSeparators(nf: Intl.NumberFormat, value: number): string {
-  return nf
-    .formatToParts(value)
+function formatWithSeparators(nf: Intl.NumberFormat, value: number, maskable = true): string {
+  const parts = nf.formatToParts(value)
+  if (maskable && isPrivate()) {
+    let masked = false
+    return parts
+      .map((part) => {
+        if (!DIGIT_PARTS.has(part.type)) return part.value
+        if (masked) return ''
+        masked = true
+        return MASK
+      })
+      .join('')
+  }
+  return parts
     .map((part) => {
       if (part.type === 'group') return GROUP
       if (part.type === 'decimal') return DECIMAL
@@ -92,6 +109,7 @@ export function formatPercent(value: number, signed = false): string {
       signDisplay: signed ? 'exceptZero' : 'auto',
     }),
     value / 100,
+    false, // percentages stay visible in "hide figures" mode
   )
 }
 

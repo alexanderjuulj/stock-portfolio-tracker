@@ -61,3 +61,11 @@
   color: var(--clr-ink);
   border-bottom-color: var(--clr-foil);
 }
+
+// Icon toggles at the end of the nav, tighter than the link gap.
+.tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 4px;
+}

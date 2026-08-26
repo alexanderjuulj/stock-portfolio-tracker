@@ -2,6 +2,7 @@ import type { FC } from "react";
 import type { JSX } from "react/jsx-runtime";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import PrivacyToggle from "../PrivacyToggle";
 import ThemeToggle from "../ThemeToggle";
 import styles from "./AppHeader.module.scss";
 
@@ -24,7 +25,10 @@ const AppHeader: FC = (): JSX.Element => (
         <NavLink to="/settings" className={navLinkClass}>
           Settings
         </NavLink>
-        <ThemeToggle />
+        <div className={styles.tools}>
+          <PrivacyToggle />
+          <ThemeToggle />
+        </div>
       </nav>
     </div>
   </header>

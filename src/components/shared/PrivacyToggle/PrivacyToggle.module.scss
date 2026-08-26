@@ -1,0 +1,20 @@
+@use "@/styles/utils/form" as *;
+
+.toggle {
+  @include icon-button;
+}
+
+// Amber while figures are hidden, so the state is visible at a glance.
+.toggleOn {
+  border-color: var(--clr-foil);
+  color: var(--clr-foil);
+
+  &:hover {
+    border-color: var(--clr-foil);
+    color: var(--clr-foil);
+  }
+}
+
+.icon {
+  display: block;
+}

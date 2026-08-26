@@ -53,6 +53,7 @@ src/
     api.ts           # apiGet/apiPost/apiPut/apiDelete fetch wrappers for /api
     finance.ts       # CURRENCIES (Frankfurter-convertible ISO codes) and SECTORS (GICS) option lists
     layoutProps.ts   # responsive-prop engine for the ui primitives
+    privacy.ts       # "hide figures" store (localStorage, usePrivacy); formatters mask money + share counts while on
     utils.ts         # cn() classname joiner, formatPrice/formatSignedPrice/formatNumber/formatPercent/formatDate, slugify
   styles/            # global SCSS (see "Styling")
   types/
@@ -103,7 +104,7 @@ Radix-Themes-compatible layout primitives implemented locally, with no Radix dep
 - Spacing props (`p`, `m`, `gap`, …) take the Radix space scale `"1"`–`"9"` (0.25rem–4rem, defined in rem) or any raw CSS length.
 - Import from `@/components` (the top-level barrel), not `@/components/ui`.
 
-`src/components/shared/` holds cross-feature presentational pieces, re-exported through `@/components` too: `AppHeader` (brand + Dashboard/History/Settings nav + `ThemeToggle`), `ActionMenu` (three-dot trigger + dropdown of `{ label, onSelect, danger?, accent? }` items, portalled to `body` so table scroll wrappers don't clip it — used for the row actions in the holdings table), `ConfirmDialog`, `FormDialog` (modal form shell: backdrop, title, error line, Cancel/Submit — mount it only while open so field state starts fresh) and `Field` (label + control + hint on the dialog's two-column grid; `full` spans both) with `fieldClasses` (`input`/`select`/`textarea` class names for the controls inside). Feature forms compose these and own only their field state.
+`src/components/shared/` holds cross-feature presentational pieces, re-exported through `@/components` too: `AppHeader` (brand + Dashboard/History/Settings nav + `PrivacyToggle` and `ThemeToggle` icon buttons, `icon-button` mixin), `ActionMenu` (three-dot trigger + dropdown of `{ label, onSelect, danger?, accent? }` items, portalled to `body` so table scroll wrappers don't clip it — used for the row actions in the holdings table), `ConfirmDialog`, `FormDialog` (modal form shell: backdrop, title, error line, Cancel/Submit — mount it only while open so field state starts fresh) and `Field` (label + control + hint on the dialog's two-column grid; `full` spans both) with `fieldClasses` (`input`/`select`/`textarea` class names for the controls inside). Feature forms compose these and own only their field state.
 
 ## Data layer
 

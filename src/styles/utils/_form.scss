@@ -171,3 +171,33 @@
   font-size: 0.875rem;
   color: var(--clr-gray-light);
 }
+
+// Square hairline icon button used by the header toggles.
+@mixin icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--clr-paper-3);
+  background: transparent;
+  color: var(--clr-muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    border-color: var(--clr-ink);
+    color: var(--clr-ink);
+  }
+
+  svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+}
