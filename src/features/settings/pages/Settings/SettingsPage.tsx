@@ -2,9 +2,10 @@ import { useRef, useState, type FC, type FormEvent } from "react";
 import type { JSX } from "react/jsx-runtime";
 import { ConfirmDialog } from "@/components";
 import { cn } from "@/lib/utils";
+import { THEMES } from "@/lib/theme";
 import type { AppSettings, QuoteProvider } from "@/types/api";
 import { importBackup } from "../../api";
-import { useSettings } from "../../hooks";
+import { useSettings, useTheme } from "../../hooks";
 import styles from "./SettingsPage.module.scss";
 
 type MarketDataFormProps = {
@@ -107,6 +108,40 @@ const MarketDataForm: FC<MarketDataFormProps> = ({ initial, saving, onSave }): J
   );
 };
 
+// Radio cards for the appearance choice; applies immediately, no save step.
+const AppearanceSection: FC = (): JSX.Element => {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <section className={styles.section}>
+      <h2 className={styles.sectionTitle}>Appearance</h2>
+      <p className={styles.sectionText}>
+        Stored in this browser only. Changes apply right away.
+      </p>
+      <div className={styles.themeGrid}>
+        {THEMES.map((t) => (
+          <label
+            key={t.value}
+            className={cn(styles.providerCard, theme === t.value && styles.providerActive)}
+          >
+            <input
+              className={styles.radio}
+              type="radio"
+              name="theme"
+              checked={theme === t.value}
+              onChange={() => setTheme(t.value)}
+            />
+            <span>
+              <span className={styles.providerName}>{t.label}</span>
+              <span className={styles.providerNote}>{t.note}</span>
+            </span>
+          </label>
+        ))}
+      </div>
+    </section>
+  );
+};
+
 const SettingsPage: FC = (): JSX.Element => {
   const { settings, loading, error, saving, save } = useSettings();
 
@@ -132,6 +167,8 @@ const SettingsPage: FC = (): JSX.Element => {
     <main className={styles.page}>
       <span className={styles.kicker}>Rahamasin</span>
       <h1 className={styles.heading}>Settings</h1>
+
+      <AppearanceSection />
 
       {loading ? (
         <p className={styles.muted}>Loading settings…</p>

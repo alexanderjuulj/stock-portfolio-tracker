@@ -1,9 +1,13 @@
-// "Night desk" palette: a trading terminal after hours. OLED-black ground
-// with a cold blue cast, slate hairlines, luminous mint for gains and coral
-// for losses, amber as the single signal color (kickers, active nav, Sell
-// markers). The ink/paper names are kept — ink is the foreground, paper the
-// ground — so every module retheme through these tokens alone.
-:root {
+// Two palettes on the same tokens. "Night desk" (default): a trading
+// terminal after hours — OLED-black ground with a cold blue cast, slate
+// hairlines, luminous mint for gains and coral for losses, amber as the single
+// signal color. "Day desk": the same desk in daylight — cool paper, deep ink,
+// the same semantics darkened for contrast. The ink/paper names are kept —
+// ink is the foreground, paper the ground — so every module themes through
+// these tokens alone. The theme is chosen by `data-theme` on <html>
+// (src/lib/theme.ts); without it the OS preference decides.
+@mixin night {
+  color-scheme: dark;
   --clr-ink: #e9eef4; // primary text, 15.6:1 on paper
   --clr-ink-soft: #b3bfcc; // secondary text, 9.4:1
   --clr-paper: #0a0e13; // ground
@@ -13,23 +17,78 @@
   --clr-loss: #ff6f61; // 6.9:1
   --clr-foil: #f2b53f; // amber signal, 9.7:1
   --clr-muted: #7f8c9b; // 5.1:1 — still AA for small labels
-
-  --background-color: var(--clr-paper);
-  --background-color-secondary: var(--clr-paper-2);
   --background-color-tertiary: #0f151b; // nested lot rows, hovered nav
   --clr-surface: #161d26; // dialogs, menus, chart card
-
-  --clr-accent: var(--clr-gain);
   --clr-accent-strong: #22b87a;
   --clr-loss-strong: #d94f42;
-  --clr-gray-dark: var(--clr-ink-soft);
-  --clr-gray-light: var(--clr-muted);
-
-  --clr-gold: var(--clr-foil);
-  --clr-white: var(--clr-surface);
-
   // Backdrop behind dialogs: ground at 78%, dialogs stay the brighter plane.
   --clr-backdrop: rgba(4, 7, 10, 0.78);
   // Soft phosphor halo for focus rings and the hero figure.
   --clr-glow: rgba(63, 220, 154, 0.35);
+  // Chevron for styled <select>s (data URIs can't read tokens).
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23b3bfcc' stroke-width='1.5'/%3E%3C/svg%3E");
+  // Sector chart slices by rank; neighbours alternate hue families.
+  --chart-1: #3fdc9a;
+  --chart-2: #f2b53f;
+  --chart-3: #5aa9ff;
+  --chart-4: #9b8cff;
+  --chart-5: #178a5c;
+  --chart-6: #c98b22;
+  --chart-7: #2f6fc4;
+  --chart-8: #ff8fa3;
+  --chart-9: #6f7f90;
+  --chart-10: #3d4a58;
+}
+
+@mixin day {
+  color-scheme: light;
+  --clr-ink: #101720; // 17.4:1 on paper
+  --clr-ink-soft: #3d4a58; // 9.0:1
+  --clr-paper: #f4f6f8;
+  --clr-paper-2: #e9edf1;
+  --clr-paper-3: #d3dae1;
+  --clr-gain: #0f8a5a; // 4.7:1
+  --clr-loss: #c9432f; // 4.9:1
+  --clr-foil: #a86f0c; // 4.6:1
+  --clr-muted: #66737f; // 4.9:1
+  --background-color-tertiary: #eef1f4;
+  --clr-surface: #ffffff;
+  --clr-accent-strong: #0a6b45;
+  --clr-loss-strong: #a3321f;
+  --clr-backdrop: rgba(16, 23, 32, 0.55);
+  --clr-glow: rgba(15, 138, 90, 0.22);
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%233d4a58' stroke-width='1.5'/%3E%3C/svg%3E");
+  --chart-1: #0f8a5a;
+  --chart-2: #b07a12;
+  --chart-3: #2f6fc4;
+  --chart-4: #6a5acd;
+  --chart-5: #3fb987;
+  --chart-6: #d9a13a;
+  --chart-7: #5aa9ff;
+  --chart-8: #d9607a;
+  --chart-9: #6f7f90;
+  --chart-10: #a9b4bf;
+}
+
+:root {
+  @include night;
+
+  // Aliases shared by both palettes.
+  --background-color: var(--clr-paper);
+  --background-color-secondary: var(--clr-paper-2);
+  --clr-accent: var(--clr-gain);
+  --clr-gray-dark: var(--clr-ink-soft);
+  --clr-gray-light: var(--clr-muted);
+  --clr-gold: var(--clr-foil);
+  --clr-white: var(--clr-surface);
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    @include day;
+  }
+}
+
+:root[data-theme="light"] {
+  @include day;
 }

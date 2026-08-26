@@ -14,19 +14,8 @@ const SIZE = 200;
 const STROKE = 26;
 const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-// Slices are colored by rank; neighbours alternate hue families so adjacent slices stay distinct.
-const PALETTE = [
-  "#3fdc9a",
-  "#f2b53f",
-  "#5aa9ff",
-  "#9b8cff",
-  "#178a5c",
-  "#c98b22",
-  "#2f6fc4",
-  "#ff8fa3",
-  "#6f7f90",
-  "#3d4a58",
-];
+// Slices are colored by rank with the --chart-N tokens (both themes in base/_colors.scss).
+const PALETTE = Array.from({ length: 10 }, (_, i) => `var(--chart-${i + 1})`);
 
 const SectorChart: FC<SectorChartProps> = ({ sectors, totalEur }): JSX.Element => {
   const [active, setActive] = useState<string | null>(null);

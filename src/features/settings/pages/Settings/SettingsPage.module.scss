@@ -34,6 +34,16 @@
   color: var(--clr-gray-dark);
 }
 
+.themeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+
+  @media (max-width: 519px) {
+    grid-template-columns: 1fr;
+  }
+}
+
 .providerCard {
   display: flex;
   align-items: flex-start;

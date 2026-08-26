@@ -11,6 +11,13 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
     />
     <title>Rahamasin</title>
+    <!-- Apply the saved theme before first paint; mirrors src/lib/theme.ts. -->
+    <script>
+      try {
+        var t = localStorage.getItem("rahamasin.theme");
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+      } catch (_) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>
