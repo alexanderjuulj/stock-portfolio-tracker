@@ -25,7 +25,8 @@
 .sectionTitle {
   font-size: 1.125rem;
   font-weight: 700;
-  color: black;
+  font-stretch: 105%;
+  color: var(--clr-ink);
 }
 
 .sectionText {
@@ -38,18 +39,19 @@
   align-items: flex-start;
   gap: 14px;
   padding: 16px;
-  background: var(--background-color-secondary);
-  border: 2px solid transparent;
+  background: var(--clr-surface);
+  border: 1px solid var(--clr-paper-3);
   cursor: pointer;
 }
 
 .providerActive {
-  border-color: var(--clr-accent);
+  border-color: var(--clr-ink);
+  box-shadow: 4px 4px 0 0 var(--clr-paper-3);
 }
 
 .radio {
   margin-top: 3px;
-  accent-color: var(--clr-accent);
+  accent-color: var(--clr-ink);
 }
 
 .providerName {
@@ -89,7 +91,6 @@
 .primaryButton {
   @include button-primary;
   padding: 13px 20px;
-  font-size: 0.9375rem;
 }
 
 .ghostButton {
@@ -97,7 +98,6 @@
   display: inline-flex;
   align-items: center;
   padding: 12px 18px;
-  font-size: 0.875rem;
   text-decoration: none;
 
   &:hover {
@@ -109,7 +109,7 @@
 .savedNote {
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--clr-accent);
+  color: var(--clr-gain);
 }
 
 .muted {

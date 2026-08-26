@@ -1,37 +1,67 @@
-// Shared form-styling mixins: squared corners, green accent, dark-gray
-// bars, small bold uppercase labels.
+// Shared styling mixins for the "night desk" look: squared corners, flat
+// slate surfaces, tracked small caps for labels, mono for every figure.
+
+// Small tracked caps, the way a terminal labels its columns.
+@mixin caps-label {
+  font-family: var(--font-primary);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
 
 @mixin kicker {
-  font-size: 0.875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--clr-accent);
+  @include caps-label;
+  color: var(--clr-foil);
+}
+
+@mixin figures($size: 0.8125rem) {
+  font-family: var(--font-mono);
+  font-size: $size;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
 @mixin page-heading {
   font-size: 2rem;
   font-weight: 700;
-  color: black;
+  letter-spacing: -0.02em;
+  color: var(--clr-ink);
+}
+
+// Double rule used under mastheads and above totals (ground shows through the gap).
+@mixin double-rule($color: var(--clr-ink)) {
+  border-bottom: 1px solid $color;
+  box-shadow: 0 3px 0 0 var(--clr-paper), 0 4px 0 0 $color;
 }
 
 @mixin field-label {
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--clr-gray-dark);
+  @include caps-label;
+  color: var(--clr-ink-soft);
 }
 
-@mixin field($bg: var(--background-color-secondary)) {
+@mixin field($bg: var(--clr-paper)) {
   appearance: none;
   width: 100%;
-  border: none;
+  border: 1px solid var(--clr-paper-3);
   border-radius: 0;
   background: $bg;
-  padding: 14px 16px;
+  padding: 12px 14px;
   font-family: inherit;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 400;
-  color: var(--clr-gray-dark);
+  color: var(--clr-ink);
+  color-scheme: dark;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+  &::placeholder {
+    color: var(--clr-muted);
+  }
+
+  &:hover {
+    border-color: var(--clr-muted);
+  }
 
   &::-webkit-outer-spin-button,
   &::-webkit-inner-spin-button {
@@ -40,17 +70,18 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--clr-accent);
-    outline-offset: 0;
+    outline: none;
+    border-color: var(--clr-accent);
+    box-shadow: 0 0 0 3px var(--clr-glow);
   }
 }
 
 // Native <select> styled like `field`, with its own chevron since
 // appearance: none removes the browser's.
-@mixin select-field($bg: var(--background-color-secondary)) {
+@mixin select-field($bg: var(--clr-paper)) {
   @include field($bg);
   padding-right: 40px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%232f4a3c' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23b3bfcc' stroke-width='1.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   cursor: pointer;
@@ -60,8 +91,10 @@
   border: none;
   border-radius: 0;
   font-family: inherit;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
   cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 
   &:focus-visible {
     outline: 2px solid var(--clr-accent);
@@ -71,37 +104,37 @@
 
 @mixin button-primary {
   @include button-base;
-  background: var(--clr-accent);
-  color: var(--clr-white);
+  background: var(--clr-gain);
+  color: var(--clr-paper);
   padding: 1.125rem 1rem;
-  font-size: 1rem;
+  font-size: 0.8125rem;
   font-weight: 700;
-  transition: background-color 0.15s ease;
   text-box: trim-both cap alphabetic;
 
   &:hover:not(:disabled) {
-    background: var(--clr-accent-strong);
+    background: var(--clr-ink);
   }
 
   &:disabled {
-    background: var(--clr-gray-light);
-    color: var(--clr-gray-dark);
+    background: var(--clr-paper-3);
+    color: var(--clr-muted);
     cursor: default;
   }
 }
 
 @mixin button-ghost {
   @include button-base;
-  border: 1px solid var(--clr-gray-light);
+  border: 1px solid var(--clr-paper-3);
   background: transparent;
-  color: var(--clr-gray-dark);
+  color: var(--clr-ink-soft);
   padding: 8px 14px;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  transition: border-color 0.15s ease;
 
   &:hover {
-    border-color: var(--clr-gray-dark);
+    border-color: var(--clr-ink);
+    color: var(--clr-ink);
+    background: var(--clr-paper-2);
   }
 }
 
@@ -121,7 +154,7 @@
   &:hover {
     color: var(--clr-gray-dark);
     text-decoration: none;
-    background: #e3ebe5;
+    background: var(--clr-paper-3);
   }
 
   &:focus-visible {

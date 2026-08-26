@@ -1,0 +1,86 @@
+@use "@/styles/utils/form" as *;
+
+.tape {
+  overflow: hidden;
+  border-bottom: 1px solid var(--clr-paper-3);
+  background: var(--clr-paper-2);
+  mask-image: linear-gradient(to right, transparent, black 48px, black calc(100% - 48px), transparent);
+}
+
+.track {
+  display: flex;
+  width: max-content;
+  // ~4s per item keeps the pace readable however many positions there are.
+  animation: tape calc(var(--items, 6) * 4s) linear infinite;
+
+  &:hover {
+    animation-play-state: paused;
+  }
+}
+
+.run {
+  display: flex;
+  flex: none;
+}
+
+@keyframes tape {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tape {
+    overflow-x: auto;
+    mask-image: none;
+  }
+
+  .track {
+    animation: none;
+  }
+
+  .run[aria-hidden="true"] {
+    display: none;
+  }
+}
+
+.item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 28px 9px 0;
+  margin-right: 28px;
+  border-right: 1px solid var(--clr-paper-3);
+  white-space: nowrap;
+}
+
+.symbol {
+  @include caps-label;
+  font-size: 0.75rem;
+  color: var(--clr-ink);
+}
+
+.price {
+  @include figures(0.75rem);
+  color: var(--clr-ink-soft);
+}
+
+.change {
+  @include figures(0.75rem);
+  font-weight: 600;
+}
+
+.up {
+  color: var(--clr-gain);
+}
+
+.down {
+  color: var(--clr-loss);
+}
+
+.flat {
+  color: var(--clr-muted);
+}

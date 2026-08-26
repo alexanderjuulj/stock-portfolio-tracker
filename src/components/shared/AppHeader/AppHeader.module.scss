@@ -1,6 +1,10 @@
+@use "@/styles/utils/form" as *;
+
+// Masthead: one hairline beneath. On the dashboard the ticker tape sits
+// directly under it and adds only its own bottom rule.
 .header {
-  background: var(--clr-white);
-  border-bottom: 1px solid var(--background-color-secondary);
+  background: var(--clr-paper);
+  border-bottom: 1px solid var(--clr-paper-3);
 }
 
 .inner {
@@ -16,20 +20,21 @@
 .brand {
   display: flex;
   align-items: center;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--clr-gray-dark);
+  font-stretch: 125%;
+  letter-spacing: 0.18em;
+  color: var(--clr-ink);
   text-decoration: none;
 
   &:hover {
-    color: var(--clr-gray-dark);
+    color: var(--clr-ink);
     text-decoration: none;
   }
 }
 
 .brandAccent {
-  color: var(--clr-accent);
+  color: var(--clr-foil);
 }
 
 .nav {
@@ -40,19 +45,19 @@
 .link {
   display: flex;
   align-items: center;
+  @include caps-label;
+  font-size: 0.75rem;
   border-bottom: 2px solid transparent;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--clr-gray-light);
+  color: var(--clr-muted);
   text-decoration: none;
 
   &:hover {
-    color: var(--clr-gray-dark);
+    color: var(--clr-ink);
     text-decoration: none;
   }
 }
 
 .linkActive {
-  color: var(--clr-gray-dark);
-  border-bottom-color: var(--clr-accent);
+  color: var(--clr-ink);
+  border-bottom-color: var(--clr-foil);
 }

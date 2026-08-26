@@ -1,18 +1,35 @@
-// Palette: deep "growth" green as the accent, gold as the secondary
-// brand color, and cool slate grays on a faintly green-tinted background.
+// "Night desk" palette: a trading terminal after hours. OLED-black ground
+// with a cold blue cast, slate hairlines, luminous mint for gains and coral
+// for losses, amber as the single signal color (kickers, active nav, Sell
+// markers). The ink/paper names are kept — ink is the foreground, paper the
+// ground — so every module retheme through these tokens alone.
 :root {
-  --background-color: #fff;
-  --background-color-secondary: #f1f5f2;
-  --background-color-tertiary: #f7faf8; // nested rows, hovered nav
+  --clr-ink: #e9eef4; // primary text, 15.6:1 on paper
+  --clr-ink-soft: #b3bfcc; // secondary text, 9.4:1
+  --clr-paper: #0a0e13; // ground
+  --clr-paper-2: #131a21; // raised surfaces, faint rules
+  --clr-paper-3: #24303b; // hairlines, borders
+  --clr-gain: #3fdc9a; // 10.6:1
+  --clr-loss: #ff6f61; // 6.9:1
+  --clr-foil: #f2b53f; // amber signal, 9.7:1
+  --clr-muted: #7f8c9b; // 5.1:1 — still AA for small labels
 
-  --clr-accent: #1b7a4b;
-  --clr-accent-strong: #135c38;
-  --clr-gray-dark: #2f4a3c;
-  --clr-gray-light: #8a9a90;
+  --background-color: var(--clr-paper);
+  --background-color-secondary: var(--clr-paper-2);
+  --background-color-tertiary: #0f151b; // nested lot rows, hovered nav
+  --clr-surface: #161d26; // dialogs, menus, chart card
 
-  --clr-gold: #c9a227;
-  --clr-white: #fff;
+  --clr-accent: var(--clr-gain);
+  --clr-accent-strong: #22b87a;
+  --clr-loss-strong: #d94f42;
+  --clr-gray-dark: var(--clr-ink-soft);
+  --clr-gray-light: var(--clr-muted);
 
-  // Backdrop behind dialogs: --clr-gray-dark at 60%.
-  --clr-backdrop: rgba(47, 74, 60, 0.6);
+  --clr-gold: var(--clr-foil);
+  --clr-white: var(--clr-surface);
+
+  // Backdrop behind dialogs: ground at 78%, dialogs stay the brighter plane.
+  --clr-backdrop: rgba(4, 7, 10, 0.78);
+  // Soft phosphor halo for focus rings and the hero figure.
+  --clr-glow: rgba(63, 220, 154, 0.35);
 }

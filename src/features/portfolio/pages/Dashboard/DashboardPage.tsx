@@ -1,6 +1,6 @@
 import { useState, type FC } from "react";
 import type { JSX } from "react/jsx-runtime";
-import { ConfirmDialog, Flex, Grid } from "@/components";
+import { ConfirmDialog, Flex } from "@/components";
 import { cn, formatDate, formatNumber, formatPercent, formatPrice, formatSignedPrice } from "@/lib/utils";
 import type {
   AccountInput,
@@ -18,6 +18,7 @@ import {
   HoldingsTable,
   SectorChart,
   SellForm,
+  TickerTape,
 } from "../../components";
 import { usePortfolio } from "../../hooks";
 import styles from "./DashboardPage.module.scss";
@@ -223,7 +224,13 @@ const DashboardPage: FC = (): JSX.Element => {
 
   return (
     <main className={styles.page}>
-      <Flex justify="between" align="end" gap="5" wrap="wrap">
+      {positions.length > 0 ? (
+        <div className={styles.tape}>
+          <TickerTape positions={positions} />
+        </div>
+      ) : null}
+
+      <Flex justify="between" align="end" gap="5" wrap="wrap" className={styles.hero}>
         <div>
           <span className={styles.kicker}>
             Portfolio{scopedAccount ? ` · ${scopedAccount.name}` : ""}
@@ -262,7 +269,7 @@ const DashboardPage: FC = (): JSX.Element => {
       ) : null}
 
       {totals && (positions.length > 0 || accounts.length > 0) ? (
-        <Grid columns={{ initial: "2", sm: "3", md: "6" }} gap="3" mt="6">
+        <div className={styles.ledger}>
           <div className={styles.tile}>
             <span className={styles.tileLabel}>Stocks</span>
             <span className={styles.tileValue}>{formatPrice(totals.stocksEur)}</span>
@@ -306,7 +313,7 @@ const DashboardPage: FC = (): JSX.Element => {
               {totals.profitPct !== null ? formatPercent(totals.profitPct, true) : "—"}
             </span>
           </div>
-        </Grid>
+        </div>
       ) : null}
 
       {notices.length > 0 ? (

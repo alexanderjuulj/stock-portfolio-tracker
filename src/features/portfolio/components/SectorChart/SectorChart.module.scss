@@ -1,10 +1,13 @@
+@use "@/styles/utils/form" as *;
+
 .chart {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 32px 48px;
   padding: 24px;
-  background: var(--background-color-secondary);
+  border: 1px solid var(--clr-paper-3);
+  background: var(--clr-surface);
 }
 
 .donutWrap {
@@ -43,11 +46,8 @@
 }
 
 .centerLabel {
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--clr-gray-light);
+  @include caps-label;
+  color: var(--clr-muted);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -55,11 +55,10 @@
 }
 
 .centerValue {
+  @include figures(1.125rem);
   margin-top: 4px;
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: black;
-  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--clr-ink);
 }
 
 .legend {
@@ -75,7 +74,7 @@
   align-items: center;
   gap: 12px;
   padding: 7px 0;
-  border-bottom: 1px solid var(--background-color);
+  border-bottom: 1px solid var(--clr-paper-2);
   font-size: 0.875rem;
   color: var(--clr-gray-dark);
   transition: opacity 0.15s ease;
@@ -104,12 +103,14 @@
 }
 
 .legendPct {
-  color: black;
-  font-weight: 700;
+  @include figures;
+  color: var(--clr-ink);
+  font-weight: 600;
 }
 
 .legendValue {
+  @include figures;
   min-width: 100px;
   text-align: right;
-  color: var(--clr-gray-light);
+  color: var(--clr-muted);
 }

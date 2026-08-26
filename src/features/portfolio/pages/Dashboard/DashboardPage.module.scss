@@ -3,7 +3,16 @@
 .page {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 48px 32px 96px;
+  padding: 0 32px 96px;
+}
+
+// Full-bleed: the tape runs edge to edge under the masthead.
+.tape {
+  margin: 0 calc(50% - 50vw);
+}
+
+.hero {
+  padding-top: 48px;
 }
 
 .kicker {
@@ -11,17 +20,22 @@
 }
 
 .heroValue {
-  margin: 8px 0 4px;
-  font-size: 3rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: black;
-  font-variant-numeric: tabular-nums;
+  @include figures(3.5rem);
+  margin: 10px 0 6px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--clr-ink);
+  text-shadow: 0 0 24px var(--clr-glow);
+
+  @media (max-width: 519px) {
+    font-size: 2.5rem;
+  }
 }
 
 .subline {
   font-size: 0.875rem;
-  color: var(--clr-gray-light);
+  color: var(--clr-muted);
 }
 
 .toolbar {
@@ -31,64 +45,103 @@
 .ghostButton {
   @include button-ghost;
   padding: 12px 18px;
-  font-size: 0.875rem;
 }
 
 .primaryButton {
   @include button-primary;
   padding: 13px 20px;
-  font-size: 0.9375rem;
+}
+
+// The stat tiles read as one ruled ledger line: a single row of cells
+// divided by hairlines, bounded by ink rules above and below.
+.ledger {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  margin-top: 36px;
+  border-top: 1px solid var(--clr-ink);
+  border-bottom: 1px solid var(--clr-ink);
+
+  @media (max-width: 1023px) {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  @media (max-width: 767px) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 .tile {
-  background: var(--background-color-secondary);
-  padding: 20px;
+  padding: 18px 20px 16px;
+  border-right: 1px solid var(--clr-paper-3);
+  border-bottom: 1px solid var(--clr-paper-3);
+
+  &:nth-child(6n) {
+    border-right: none;
+  }
+
+  @media (max-width: 1023px) {
+    &:nth-child(6n) {
+      border-right: 1px solid var(--clr-paper-3);
+    }
+    &:nth-child(3n) {
+      border-right: none;
+    }
+  }
+
+  @media (max-width: 767px) {
+    &:nth-child(3n) {
+      border-right: 1px solid var(--clr-paper-3);
+    }
+    &:nth-child(2n) {
+      border-right: none;
+    }
+  }
+
+  &:first-child {
+    padding-left: 0;
+  }
 }
 
 .tileLabel {
+  @include caps-label;
   display: block;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--clr-gray-light);
+  color: var(--clr-muted);
 }
 
 .tileValue {
+  @include figures(1.25rem);
   display: block;
   margin-top: 10px;
-  font-size: 1.375rem;
-  font-weight: 700;
-  color: black;
-  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  color: var(--clr-ink);
 }
 
 .tileHint {
+  @include figures(0.6875rem);
   display: block;
   margin-top: 4px;
-  font-size: 0.75rem;
-  color: var(--clr-gray-light);
-  font-variant-numeric: tabular-nums;
+  font-weight: 400;
+  color: var(--clr-muted);
 }
 
 .pos {
-  color: var(--clr-accent);
+  color: var(--clr-gain);
 }
 
 .neg {
-  color: var(--text-clr-error);
+  color: var(--clr-loss);
 }
 
 .notice {
   margin-top: 24px;
   padding: 12px 16px;
-  border-left: 3px solid var(--text-clr-pending);
-  background: var(--background-color-secondary);
+  border-left: 3px solid var(--clr-foil);
+  background: var(--clr-paper-2);
 }
 
 .noticeLine {
   font-size: 0.875rem;
-  color: var(--clr-gray-dark);
+  color: var(--clr-ink-soft);
 }
 
 .tabs {
@@ -96,7 +149,7 @@
 }
 
 .section {
-  margin-top: 40px;
+  margin-top: 44px;
 }
 
 .sectionHeader {
@@ -107,29 +160,32 @@
   margin-top: 4px;
   font-size: 1.125rem;
   font-weight: 700;
-  color: black;
+  font-stretch: 105%;
+  letter-spacing: -0.01em;
+  color: var(--clr-ink);
 }
 
 .stateText {
   font-size: 1rem;
-  color: var(--clr-gray-light);
+  color: var(--clr-muted);
 }
 
 .empty {
   padding: 64px 32px;
-  background: var(--background-color-secondary);
+  border: 1px dashed var(--clr-paper-3);
   text-align: center;
 }
 
 .emptyTitle {
   font-size: 1.25rem;
   font-weight: 700;
-  color: black;
+  font-stretch: 105%;
+  color: var(--clr-ink);
 }
 
 .emptyText {
   margin: 8px auto 24px;
   max-width: 400px;
   font-size: 0.9375rem;
-  color: var(--clr-gray-dark);
+  color: var(--clr-ink-soft);
 }

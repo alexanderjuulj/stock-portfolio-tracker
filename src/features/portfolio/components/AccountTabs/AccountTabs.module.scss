@@ -1,8 +1,10 @@
+@use "@/styles/utils/form" as *;
+
 .tabs {
   display: flex;
   flex-wrap: wrap;
   gap: 0 28px;
-  border-bottom: 1px solid var(--background-color-secondary);
+  border-bottom: 1px solid var(--clr-paper-3);
 }
 
 .tab {
@@ -11,10 +13,9 @@
   border: none;
   border-bottom: 2px solid transparent;
   background: none;
-  font-family: inherit;
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: var(--clr-gray-light);
+  @include caps-label;
+  font-size: 0.75rem;
+  color: var(--clr-muted);
   cursor: pointer;
 
   &:hover {
@@ -28,6 +29,6 @@
 }
 
 .tabActive {
-  color: var(--clr-gray-dark);
-  border-bottom-color: var(--clr-accent);
+  color: var(--clr-ink);
+  border-bottom-color: var(--clr-ink);
 }

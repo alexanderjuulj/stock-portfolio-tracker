@@ -14,18 +14,18 @@ const SIZE = 200;
 const STROKE = 26;
 const RADIUS = (SIZE - STROKE) / 2;
 const CIRCUMFERENCE = 2 * Math.PI * RADIUS;
-// Slices are colored by rank, so the largest sectors always get the strongest greens.
+// Slices are colored by rank; neighbours alternate hue families so adjacent slices stay distinct.
 const PALETTE = [
-  "#1b7a4b",
-  "#2f9e63",
-  "#5cbf84",
-  "#9ad9b4",
-  "#c9a227",
-  "#e0c36a",
-  "#3f6f8f",
-  "#7aa6c2",
-  "#8d6e4b",
-  "#c4a58a",
+  "#3fdc9a",
+  "#f2b53f",
+  "#5aa9ff",
+  "#9b8cff",
+  "#178a5c",
+  "#c98b22",
+  "#2f6fc4",
+  "#ff8fa3",
+  "#6f7f90",
+  "#3d4a58",
 ];
 
 const SectorChart: FC<SectorChartProps> = ({ sectors, totalEur }): JSX.Element => {
@@ -60,7 +60,7 @@ const SectorChart: FC<SectorChartProps> = ({ sectors, totalEur }): JSX.Element =
             cy={SIZE / 2}
             r={RADIUS}
             fill="none"
-            stroke="var(--background-color-secondary)"
+            stroke="var(--clr-paper-2)"
             strokeWidth={STROKE}
           />
           {slices.map((s) => (

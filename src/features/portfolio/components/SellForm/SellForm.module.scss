@@ -1,3 +1,5 @@
+@use "@/styles/utils/form" as *;
+
 .static {
   display: block;
   padding: 14px 0;
@@ -32,9 +34,10 @@
   flex-direction: column;
   gap: 8px;
   padding: 16px;
-  background: var(--background-color-secondary);
-  font-size: 0.9375rem;
-  font-variant-numeric: tabular-nums;
+  border: 1px solid var(--clr-paper-3);
+  background: var(--clr-paper-2);
+  @include figures(0.875rem);
+  font-weight: 400;
   color: var(--clr-gray-dark);
 }
 
@@ -46,9 +49,9 @@
 
 .previewTotal {
   padding-top: 8px;
-  border-top: 1px solid var(--clr-gray-light);
-  font-weight: 700;
-  color: black;
+  border-top: 1px solid var(--clr-ink);
+  font-weight: 600;
+  color: var(--clr-ink);
 }
 
 .pos {

@@ -1,5 +1,6 @@
 import type { FC } from "react";
 import type { JSX } from "react/jsx-runtime";
+import { ActionMenu } from "@/components";
 import { cn, formatDate, formatNumber, formatPrice, formatSignedPrice } from "@/lib/utils";
 import type { HistoryEntry } from "@/types/api";
 import styles from "./HistoryTable.module.scss";
@@ -85,18 +86,13 @@ const HistoryTable: FC<HistoryTableProps> = ({ entries, onEditSale, onDeleteSale
             </td>
             <td className={styles.actionsCell}>
               {entry.kind === "sell" ? (
-                <>
-                  <button type="button" className={styles.action} onClick={() => onEditSale(entry)}>
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className={cn(styles.action, styles.actionDanger)}
-                    onClick={() => onDeleteSale(entry)}
-                  >
-                    Delete
-                  </button>
-                </>
+                <ActionMenu
+                  label={`Actions for the ${entry.ticker} sale`}
+                  items={[
+                    { label: "Edit", onSelect: () => onEditSale(entry) },
+                    { label: "Delete", danger: true, onSelect: () => onDeleteSale(entry) },
+                  ]}
+                />
               ) : null}
             </td>
           </tr>

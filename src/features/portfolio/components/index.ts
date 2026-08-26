@@ -9,3 +9,4 @@ export { default as RealizedTable } from "./RealizedTable/RealizedTable";
 export { default as SectorChart } from "./SectorChart/SectorChart";
 export { default as SectorSelect } from "./SectorSelect/SectorSelect";
 export { default as SellForm } from "./SellForm/SellForm";
+export { default as TickerTape } from "./TickerTape/TickerTape";

@@ -19,14 +19,18 @@
   width: 100%;
   max-width: 560px;
   margin: auto 0;
-  background: var(--clr-white);
+  border: 1px solid var(--clr-ink);
+  box-shadow: 6px 6px 0 0 var(--clr-paper-3);
+  background: var(--clr-surface);
   padding: 32px;
 }
 
 .title {
   font-size: 1.25rem;
   font-weight: 700;
-  color: black;
+  font-stretch: 105%;
+  letter-spacing: -0.01em;
+  color: var(--clr-ink);
 }
 
 .body {
