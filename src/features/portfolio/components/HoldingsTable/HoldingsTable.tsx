@@ -7,6 +7,7 @@ import {
   formatNumber,
   formatPercent,
   formatPrice,
+  formatQuote,
   formatSignedPrice,
 } from "@/lib/utils";
 import type { PortfolioLot, PortfolioPosition, PortfolioTotals } from "@/types/api";
@@ -109,7 +110,7 @@ const HoldingsTable: FC<HoldingsTableProps> = ({
                       : undefined
                   }
                 >
-                  {p.marketPrice !== null ? formatPrice(p.marketPrice, currency) : "—"}
+                  {p.marketPrice !== null ? formatQuote(p.marketPrice, currency) : "—"}
                   {p.quoteStale ? <span className={styles.stale}>stale</span> : null}
                 </td>
                 <td className={cn(styles.num, styles.strong, profitClass(p.profit))}>

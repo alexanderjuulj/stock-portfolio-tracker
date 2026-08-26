@@ -76,6 +76,20 @@ export function formatPrice(amount: number, currency = 'EUR'): string {
   )
 }
 
+/** A market quote: public information, so never masked by "hide figures". */
+export function formatQuote(amount: number, currency = 'EUR'): string {
+  return formatWithSeparators(
+    new Intl.NumberFormat('et-EE', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 2,
+      useGrouping: 'always',
+    }),
+    amount,
+    false,
+  )
+}
+
 export function formatSignedPrice(amount: number, currency = 'EUR'): string {
   return formatWithSeparators(
     new Intl.NumberFormat('et-EE', {

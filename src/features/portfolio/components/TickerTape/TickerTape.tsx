@@ -1,6 +1,6 @@
 import type { CSSProperties, FC } from "react";
 import type { JSX } from "react/jsx-runtime";
-import { cn, formatPercent, formatPrice } from "@/lib/utils";
+import { cn, formatPercent, formatQuote } from "@/lib/utils";
 import type { PortfolioPosition } from "@/types/api";
 import styles from "./TickerTape.module.scss";
 
@@ -28,7 +28,7 @@ const TickerTape: FC<TickerTapeProps> = ({ positions }): JSX.Element | null => {
     return (
       <span key={`${p.ticker}-${i}`} className={styles.item}>
         <span className={styles.symbol}>{p.ticker}</span>
-        <span className={styles.price}>{formatPrice(p.marketPrice ?? 0, p.currencyEffective)}</span>
+        <span className={styles.price}>{formatQuote(p.marketPrice ?? 0, p.currencyEffective)}</span>
         <span className={cn(styles.change, tone)}>
           {change === null ? "—" : `${change >= 0 ? "▲" : "▼"} ${formatPercent(Math.abs(change))}`}
         </span>

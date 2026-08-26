@@ -53,7 +53,7 @@ src/
     api.ts           # apiGet/apiPost/apiPut/apiDelete fetch wrappers for /api
     finance.ts       # CURRENCIES (Frankfurter-convertible ISO codes) and SECTORS (GICS) option lists
     layoutProps.ts   # responsive-prop engine for the ui primitives
-    privacy.ts       # "hide figures" store (localStorage, usePrivacy); formatters mask money + share counts while on
+    privacy.ts       # "hide figures" store (localStorage, usePrivacy); formatters mask money + share counts while on (formatQuote never does)
     utils.ts         # cn() classname joiner, formatPrice/formatSignedPrice/formatNumber/formatPercent/formatDate, slugify
   styles/            # global SCSS (see "Styling")
   types/
