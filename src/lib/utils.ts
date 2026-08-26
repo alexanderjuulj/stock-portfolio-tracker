@@ -76,7 +76,10 @@ export function formatPrice(amount: number, currency = 'EUR'): string {
   )
 }
 
-/** A market quote: public information, so never masked by "hide figures". */
+/**
+ * A per-share price (market quote, average buy, lot price): never masked by
+ * "hide figures" since it says nothing about position size.
+ */
 export function formatQuote(amount: number, currency = 'EUR'): string {
   return formatWithSeparators(
     new Intl.NumberFormat('et-EE', {

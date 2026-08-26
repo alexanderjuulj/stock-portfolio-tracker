@@ -101,7 +101,7 @@ const HoldingsTable: FC<HoldingsTableProps> = ({
                   ) : null}
                 </td>
                 <td className={styles.num}>{formatNumber(p.quantity, 4)}</td>
-                <td className={styles.num}>{formatPrice(p.avgPurchasePrice, currency)}</td>
+                <td className={styles.num}>{formatQuote(p.avgPurchasePrice, currency)}</td>
                 <td
                   className={styles.num}
                   title={
@@ -197,7 +197,7 @@ const HoldingsTable: FC<HoldingsTableProps> = ({
                           </span>
                         ) : null}
                       </td>
-                      <td className={styles.num}>{formatPrice(lot.purchasePrice, currency)}</td>
+                      <td className={styles.num}>{formatQuote(lot.purchasePrice, currency)}</td>
                       <td />
                       <td className={cn(styles.num, profitClass(lot.profit))}>
                         {lot.profit !== null ? formatSignedPrice(lot.profit, currency) : "—"}
