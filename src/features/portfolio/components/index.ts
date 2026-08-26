@@ -6,5 +6,6 @@ export { default as HistoryTable } from "./HistoryTable/HistoryTable";
 export { default as HoldingForm } from "./HoldingForm/HoldingForm";
 export { default as HoldingsTable } from "./HoldingsTable/HoldingsTable";
 export { default as RealizedTable } from "./RealizedTable/RealizedTable";
+export { default as SectorChart } from "./SectorChart/SectorChart";
 export { default as SectorSelect } from "./SectorSelect/SectorSelect";
 export { default as SellForm } from "./SellForm/SellForm";

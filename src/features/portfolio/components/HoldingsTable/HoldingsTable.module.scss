@@ -19,8 +19,12 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--clr-gray-light);
-  text-align: left;
+  text-align: right;
   border-bottom: 1px solid var(--clr-gray-light);
+
+  &:first-child {
+    text-align: left;
+  }
 }
 
 .table tbody td {
@@ -143,6 +147,8 @@
 .sector {
   display: block;
   max-width: 150px;
+  margin-left: auto;
+  text-align: right;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -150,6 +156,8 @@
 .notes {
   display: block;
   max-width: 140px;
+  margin-left: auto;
+  text-align: right;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -159,11 +167,11 @@
   padding-top: 10px;
   padding-bottom: 10px;
   font-size: 0.8125rem;
-  background: #f8f9fa;
+  background: var(--background-color-tertiary);
 }
 
 .table tbody tr.lotRow:hover {
-  background: #f8f9fa;
+  background: var(--background-color-tertiary);
 }
 
 .lotCell {
@@ -187,6 +195,7 @@
 .actionsCell {
   position: sticky;
   right: 0;
+  width: 44px;
   background: var(--clr-white);
   text-align: right;
 }
@@ -197,33 +206,5 @@
 
 .lotActions,
 .table tbody tr.lotRow:hover .lotActions {
-  background: #f8f9fa;
-}
-
-.action {
-  border: none;
-  background: none;
-  padding: 2px 6px;
-  font-family: inherit;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--clr-gray-light);
-  cursor: pointer;
-
-  &:hover {
-    color: var(--clr-gray-dark);
-  }
-
-  &:focus-visible {
-    outline: 2px solid var(--clr-accent);
-    outline-offset: 0;
-  }
-}
-
-.actionSell:hover {
-  color: var(--clr-accent);
-}
-
-.actionDanger:hover {
-  color: var(--text-clr-error);
+  background: var(--background-color-tertiary);
 }

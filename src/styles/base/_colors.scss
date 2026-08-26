@@ -1,11 +1,18 @@
+// Palette: deep "growth" green as the accent, gold as the secondary
+// brand color, and cool slate grays on a faintly green-tinted background.
 :root {
   --background-color: #fff;
-  --background-color-secondary: #f3f5f6;
+  --background-color-secondary: #f1f5f2;
+  --background-color-tertiary: #f7faf8; // nested rows, hovered nav
 
-  --clr-accent: #00b9ad;
-  --clr-gray-dark: #4c5c65;
-  --clr-gray-light: #9da6ab;
+  --clr-accent: #1b7a4b;
+  --clr-accent-strong: #135c38;
+  --clr-gray-dark: #2f4a3c;
+  --clr-gray-light: #8a9a90;
 
-  --clr-magenta: #ec008c;
+  --clr-gold: #c9a227;
   --clr-white: #fff;
+
+  // Backdrop behind dialogs: --clr-gray-dark at 60%.
+  --clr-backdrop: rgba(47, 74, 60, 0.6);
 }

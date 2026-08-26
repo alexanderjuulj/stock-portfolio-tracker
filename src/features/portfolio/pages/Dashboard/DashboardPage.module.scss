@@ -63,6 +63,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+.tileHint {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: var(--clr-gray-light);
+  font-variant-numeric: tabular-nums;
+}
+
 .pos {
   color: var(--clr-accent);
 }

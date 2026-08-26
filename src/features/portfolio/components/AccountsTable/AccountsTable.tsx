@@ -1,6 +1,7 @@
 import type { FC } from "react";
 import type { JSX } from "react/jsx-runtime";
-import { cn, formatPrice } from "@/lib/utils";
+import { ActionMenu } from "@/components";
+import { cn, formatPercent, formatPrice } from "@/lib/utils";
 import type { AccountSummary } from "@/types/api";
 import styles from "./AccountsTable.module.scss";
 
@@ -33,7 +34,14 @@ const AccountsTable: FC<AccountsTableProps> = ({ accounts, onEdit, onDelete }): 
           {accounts.map((account) => (
             <tr key={account.id}>
               <td className={styles.name}>{account.name}</td>
-              <td className={styles.num}>{formatPrice(account.cash, account.currency)}</td>
+              <td className={styles.num}>
+                {formatPrice(account.cash, account.currency)}
+                {account.cashPct !== null ? (
+                  <span className={styles.hint} title="Share of the whole portfolio (stocks + cash)">
+                    {formatPercent(account.cashPct)} of portfolio
+                  </span>
+                ) : null}
+              </td>
               <td
                 className={styles.num}
                 title={account.cashEur === null ? `No EUR rate for ${account.currency}` : undefined}
@@ -46,16 +54,13 @@ const AccountsTable: FC<AccountsTableProps> = ({ accounts, onEdit, onDelete }): 
               </td>
               <td className={styles.num}>{account.lotCount}</td>
               <td className={styles.actionsCell}>
-                <button type="button" className={styles.action} onClick={() => onEdit(account)}>
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  className={cn(styles.action, styles.actionDanger)}
-                  onClick={() => onDelete(account)}
-                >
-                  Delete
-                </button>
+                <ActionMenu
+                  label={`Actions for ${account.name}`}
+                  items={[
+                    { label: "Edit", onSelect: () => onEdit(account) },
+                    { label: "Delete", danger: true, onSelect: () => onDelete(account) },
+                  ]}
+                />
               </td>
             </tr>
           ))}
@@ -64,7 +69,13 @@ const AccountsTable: FC<AccountsTableProps> = ({ accounts, onEdit, onDelete }): 
           <tfoot>
             <tr>
               <td>All accounts</td>
-              <td />
+              <td className={styles.num}>
+                {cashEur + stocksEur > 0 ? (
+                  <span className={styles.hint}>
+                    {formatPercent((cashEur / (cashEur + stocksEur)) * 100)} of portfolio
+                  </span>
+                ) : null}
+              </td>
               <td className={styles.num}>{formatPrice(cashEur)}</td>
               <td className={styles.num}>{formatPrice(stocksEur)}</td>
               <td className={styles.num}>{formatPrice(cashEur + stocksEur)}</td>

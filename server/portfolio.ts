@@ -14,6 +14,7 @@ import type {
   PortfolioPosition,
   PortfolioResponse,
   PortfolioTotals,
+  SectorAllocation,
 } from "../src/types/api";
 
 type PortfolioOptions = {
@@ -98,12 +99,19 @@ export async function buildPortfolio({ force, accountId }: PortfolioOptions): Pr
     return {
       ...account,
       cashEur,
+      cashPct: null,
       stocksEur,
       totalEur: cashEur === null ? null : cashEur + stocksEur,
       realizedEur,
       lotCount: own.length,
     };
   });
+  const portfolioEur = accountSummaries.reduce((sum, a) => sum + (a.totalEur ?? 0), 0);
+  if (portfolioEur > 0) {
+    for (const account of accountSummaries) {
+      if (account.cashEur !== null) account.cashPct = (account.cashEur / portfolioEur) * 100;
+    }
+  }
 
   const inScope = (ownerAccountId: number) => accountId === null || ownerAccountId === accountId;
   const scopedLots = computedLots.filter((l) => inScope(l.accountId));
@@ -130,6 +138,11 @@ export async function buildPortfolio({ force, accountId }: PortfolioOptions): Pr
     const quantity = tickerLots.reduce((sum, l) => sum + l.quantity, 0);
     const cost = tickerLots.reduce((sum, l) => sum + l.purchasePrice * l.quantity, 0);
     const marketPrice = quote?.price ?? null;
+    const previousClose = quote?.previousClose ?? null;
+    const dayChangePct =
+      marketPrice === null || previousClose === null || previousClose <= 0
+        ? null
+        : (marketPrice / previousClose - 1) * 100;
     const marketValue = marketPrice === null ? null : marketPrice * quantity;
     const profit = marketValue === null ? null : marketValue - cost;
     const profitPct = marketValue === null || cost <= 0 ? null : (marketValue / cost - 1) * 100;
@@ -159,6 +172,7 @@ export async function buildPortfolio({ force, accountId }: PortfolioOptions): Pr
       quantity,
       avgPurchasePrice: quantity > 0 ? cost / quantity : 0,
       marketPrice,
+      dayChangePct,
       profit,
       profitPct,
       marketValue,
@@ -188,9 +202,24 @@ export async function buildPortfolio({ force, accountId }: PortfolioOptions): Pr
       (b.marketValueEur ?? -1) - (a.marketValueEur ?? -1) || a.ticker.localeCompare(b.ticker),
   );
 
+  // Sector allocation of the priced positions, largest first.
+  const bySector = new Map<string, SectorAllocation>();
+  for (const position of positions) {
+    if (position.marketValueEur === null) continue;
+    const sector = position.sector || "Unassigned";
+    const entry = bySector.get(sector) ?? { sector, valueEur: 0, pct: 0, tickers: [] };
+    entry.valueEur += position.marketValueEur;
+    entry.tickers.push(position.ticker);
+    bySector.set(sector, entry);
+  }
+  const sectors = [...bySector.values()]
+    .map((s) => ({ ...s, pct: stocksEur > 0 ? (s.valueEur / stocksEur) * 100 : 0 }))
+    .sort((a, b) => b.valueEur - a.valueEur || a.sector.localeCompare(b.sector));
+
   const cashEur = scopedAccounts.reduce((sum, a) => sum + (a.cashEur ?? 0), 0);
   const realizedEur = scopedSales.reduce((sum, s) => sum + (realizedEurOf(s, rates) ?? 0), 0);
   const profitEur = stocksEur - costEur;
+  const totalEur = stocksEur + cashEur;
   const totals: PortfolioTotals = {
     stocksEur,
     costEur,
@@ -198,7 +227,8 @@ export async function buildPortfolio({ force, accountId }: PortfolioOptions): Pr
     profitPct: costEur > 0 ? (profitEur / costEur) * 100 : null,
     realizedEur,
     cashEur,
-    totalEur: stocksEur + cashEur,
+    totalEur,
+    cashPct: totalEur > 0 ? (cashEur / totalEur) * 100 : null,
   };
 
   let quotesAsOf: string | null = null;
@@ -225,6 +255,7 @@ export async function buildPortfolio({ force, accountId }: PortfolioOptions): Pr
     accounts: accountSummaries,
     stocks,
     totals,
+    sectors,
     fxRates: Object.fromEntries(rates),
     quotesAsOf,
     errors,

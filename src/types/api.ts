@@ -128,6 +128,8 @@ export type PortfolioPosition = Stock & {
   /** Quantity-weighted average purchase price. */
   avgPurchasePrice: number;
   marketPrice: number | null;
+  /** Change since the previous session's close, as a percentage; null when unknown. */
+  dayChangePct: number | null;
   profit: number | null;
   profitPct: number | null;
   marketValue: number | null;
@@ -148,6 +150,8 @@ export type PortfolioPosition = Stock & {
 export type AccountSummary = Account & {
   /** Null when there is no EUR rate for the account's currency. */
   cashEur: number | null;
+  /** cashEur as a share of the whole portfolio (all accounts, stocks + cash), 0–100. */
+  cashPct: number | null;
   /** EUR value of the priced lots held in the account. */
   stocksEur: number;
   /** cashEur + stocksEur, or null when cash can't be converted. */
@@ -171,6 +175,18 @@ export type PortfolioTotals = {
   cashEur: number;
   /** stocksEur + cashEur. */
   totalEur: number;
+  /** cashEur as a share of totalEur, 0–100; null when the total is zero. */
+  cashPct: number | null;
+};
+
+/** EUR value held in one sector, for the allocation chart. */
+export type SectorAllocation = {
+  /** Sector name; "Unassigned" for stocks without one. */
+  sector: string;
+  valueEur: number;
+  /** Share of the scoped stocks value, 0–100. */
+  pct: number;
+  tickers: string[];
 };
 
 export type PortfolioResponse = {
@@ -184,6 +200,8 @@ export type PortfolioResponse = {
   stocks: Stock[];
   /** Scoped totals. */
   totals: PortfolioTotals;
+  /** Scoped stocks value grouped by sector, largest first. */
+  sectors: SectorAllocation[];
   /** EUR per unit for every currency in play (stocks and cash). */
   fxRates: Record<string, number>;
   /** Oldest quote timestamp in the response (ISO); null when nothing is quoted. */

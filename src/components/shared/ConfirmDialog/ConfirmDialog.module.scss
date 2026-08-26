@@ -8,7 +8,7 @@
   align-items: center;
   justify-content: center;
   padding: 24px;
-  background: rgba(76, 92, 101, 0.6); // --clr-gray-dark at 60%
+  background: var(--clr-backdrop);
 }
 
 .dialog {

@@ -20,6 +20,8 @@ const FETCH_CONCURRENCY = 5;
 export type Quote = {
   ticker: string;
   price: number;
+  /** Previous session's close, when the provider reports it. */
+  previousClose: number | null;
   currency: string | null;
   name: string | null;
   fetchedAt: string;
@@ -33,13 +35,20 @@ export function getQuoteProvider(): QuoteProvider {
 
 // ── Provider fetchers ────────────────────────────────────────────────────────
 
-type FetchedQuote = { price: number; currency: string | null; name: string | null };
+type FetchedQuote = {
+  price: number;
+  previousClose: number | null;
+  currency: string | null;
+  name: string | null;
+};
 
 type YahooChartResponse = {
   chart?: {
     result?: Array<{
       meta?: {
         regularMarketPrice?: number;
+        chartPreviousClose?: number;
+        previousClose?: number;
         currency?: string;
         shortName?: string;
         longName?: string;
@@ -67,12 +76,14 @@ async function fetchYahoo(ticker: string): Promise<FetchedQuote> {
   const meta = json.chart?.result?.[0]?.meta;
   if (typeof meta?.regularMarketPrice !== "number") throw new Error("no price in the Yahoo response");
   let price = meta.regularMarketPrice;
+  let previousClose = meta.previousClose ?? meta.chartPreviousClose ?? null;
   let currency = meta.currency ?? null;
   if (currency === "GBp") {
     price /= 100; // London quotes arrive in pence
+    if (previousClose !== null) previousClose /= 100;
     currency = "GBP";
   }
-  return { price, currency, name: meta.shortName ?? meta.longName ?? null };
+  return { price, previousClose, currency, name: meta.shortName ?? meta.longName ?? null };
 }
 
 async function fetchFinnhub(ticker: string): Promise<FetchedQuote> {
@@ -83,9 +94,9 @@ async function fetchFinnhub(ticker: string): Promise<FetchedQuote> {
   if (res.status === 401 || res.status === 403) throw new Error("Finnhub rejected the API key");
   if (res.status === 429) throw new Error("Finnhub rate limit reached — try again in a minute");
   if (!res.ok) throw new Error(`Finnhub responded ${res.status}`);
-  const json = (await res.json()) as { c?: number };
+  const json = (await res.json()) as { c?: number; pc?: number };
   if (!json.c) throw new Error("unknown symbol"); // Finnhub reports price 0 for tickers it doesn't know
-  return { price: json.c, currency: null, name: null };
+  return { price: json.c, previousClose: json.pc || null, currency: null, name: null };
 }
 
 // ── Quote cache ──────────────────────────────────────────────────────────────
@@ -93,6 +104,7 @@ async function fetchFinnhub(ticker: string): Promise<FetchedQuote> {
 type QuoteRow = {
   ticker: string;
   price: number;
+  previous_close: number | null;
   currency: string | null;
   name: string | null;
   fetched_at: string;
@@ -107,6 +119,7 @@ function rowToQuote(row: QuoteRow, stale: boolean): Quote {
   return {
     ticker: row.ticker,
     price: row.price,
+    previousClose: row.previous_close,
     currency: row.currency,
     name: row.name,
     fetchedAt: row.fetched_at,
@@ -140,7 +153,7 @@ export async function getQuotes(
   const errors: string[] = [];
 
   const select = db.prepare(
-    "SELECT ticker, price, currency, name, fetched_at FROM quotes WHERE ticker = ?",
+    "SELECT ticker, price, previous_close, currency, name, fetched_at FROM quotes WHERE ticker = ?",
   );
   const cached = new Map<string, QuoteRow>();
   for (const ticker of unique) {
@@ -155,17 +168,25 @@ export async function getQuotes(
 
   const provider = getQuoteProvider();
   const upsert = db.prepare(
-    `INSERT INTO quotes (ticker, price, currency, name, fetched_at) VALUES (?, ?, ?, ?, ?)
+    `INSERT INTO quotes (ticker, price, previous_close, currency, name, fetched_at)
+     VALUES (?, ?, ?, ?, ?, ?)
      ON CONFLICT(ticker) DO UPDATE SET
-       price = excluded.price, currency = excluded.currency,
-       name = excluded.name, fetched_at = excluded.fetched_at`,
+       price = excluded.price, previous_close = excluded.previous_close,
+       currency = excluded.currency, name = excluded.name, fetched_at = excluded.fetched_at`,
   );
 
   await mapLimit(toFetch, FETCH_CONCURRENCY, async (ticker) => {
     try {
       const fetched = provider === "finnhub" ? await fetchFinnhub(ticker) : await fetchYahoo(ticker);
       const fetchedAt = new Date().toISOString();
-      upsert.run(ticker, fetched.price, fetched.currency, fetched.name, fetchedAt);
+      upsert.run(
+        ticker,
+        fetched.price,
+        fetched.previousClose,
+        fetched.currency,
+        fetched.name,
+        fetchedAt,
+      );
       quotes.set(ticker, { ticker, ...fetched, fetchedAt, stale: false });
     } catch (err) {
       errors.push(`${ticker}: ${err instanceof Error ? err.message : String(err)}`);
@@ -188,7 +209,7 @@ export async function getQuotes(
 /** Cache-only lookup — never fetches. For history views of tickers no longer held. */
 export function peekQuotes(tickers: string[]): Map<string, Quote> {
   const select = getDb().prepare(
-    "SELECT ticker, price, currency, name, fetched_at FROM quotes WHERE ticker = ?",
+    "SELECT ticker, price, previous_close, currency, name, fetched_at FROM quotes WHERE ticker = ?",
   );
   const quotes = new Map<string, Quote>();
   for (const ticker of new Set(tickers)) {

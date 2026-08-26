@@ -9,7 +9,7 @@
   justify-content: center;
   padding: 24px;
   overflow-y: auto;
-  background: rgba(76, 92, 101, 0.6); // --clr-gray-dark at 60%
+  background: var(--clr-backdrop);
 }
 
 .dialog {

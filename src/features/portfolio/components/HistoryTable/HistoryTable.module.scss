@@ -54,7 +54,7 @@
   color: var(--text-clr-error);
 }
 
-// Buy/Sell markers — small, uppercase, sells in the brand magenta.
+// Buy/Sell markers — small, uppercase, sells in the brand gold.
 .kindBuy,
 .kindSell {
   display: inline-block;
@@ -66,7 +66,7 @@
 }
 
 .kindSell {
-  color: var(--clr-magenta);
+  color: var(--clr-gold);
 }
 
 .caption {

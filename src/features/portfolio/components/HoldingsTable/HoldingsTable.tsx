@@ -1,5 +1,6 @@
 import { useState, type FC } from "react";
 import type { JSX } from "react/jsx-runtime";
+import { ActionMenu } from "@/components";
 import {
   cn,
   formatDate,
@@ -62,6 +63,9 @@ const HoldingsTable: FC<HoldingsTableProps> = ({
             <th className={styles.num}>Value</th>
             <th className={styles.num}>Value €</th>
             <th className={styles.num}>Weight</th>
+            <th className={styles.num} title="Price change since the previous close">
+              Day %
+            </th>
             <th>Sector</th>
             <th>Notes</th>
             <th className={styles.actionsCell} aria-label="Actions" />
@@ -135,6 +139,9 @@ const HoldingsTable: FC<HoldingsTableProps> = ({
                     "—"
                   )}
                 </td>
+                <td className={cn(styles.num, styles.strong, profitClass(p.dayChangePct))}>
+                  {p.dayChangePct !== null ? formatPercent(p.dayChangePct, true) : "—"}
+                </td>
                 <td>
                   {p.sector ? (
                     <span className={styles.sector} title={p.sector}>
@@ -154,32 +161,22 @@ const HoldingsTable: FC<HoldingsTableProps> = ({
                   )}
                 </td>
                 <td className={styles.actionsCell}>
-                  {p.lots.length === 1 ? (
-                    <button
-                      type="button"
-                      className={styles.action}
-                      onClick={() => onEditLot(p.lots[0])}
-                    >
-                      Edit
-                    </button>
-                  ) : null}
-                  <button
-                    type="button"
-                    className={cn(styles.action, styles.actionSell)}
-                    onClick={() => onSell(p, p.accountCount === 1 ? p.lots[0].accountId : null)}
-                  >
-                    Sell
-                  </button>
-                  <button type="button" className={styles.action} onClick={() => onAddLot(p)}>
-                    Add lot
-                  </button>
-                  <button
-                    type="button"
-                    className={cn(styles.action, styles.actionDanger)}
-                    onClick={() => onDeleteStock(p)}
-                  >
-                    Delete
-                  </button>
+                  <ActionMenu
+                    label={`Actions for ${p.ticker}`}
+                    items={[
+                      {
+                        label: "Sell",
+                        accent: true,
+                        onSelect: () =>
+                          onSell(p, p.accountCount === 1 ? p.lots[0].accountId : null),
+                      },
+                      { label: "Add lot", onSelect: () => onAddLot(p) },
+                      ...(p.lots.length === 1
+                        ? [{ label: "Edit", onSelect: () => onEditLot(p.lots[0]) }]
+                        : []),
+                      { label: "Delete", danger: true, onSelect: () => onDeleteStock(p) },
+                    ]}
+                  />
                 </td>
               </tr>,
               ...(isOpen
@@ -213,29 +210,16 @@ const HoldingsTable: FC<HoldingsTableProps> = ({
                       <td className={styles.num}>
                         {lot.marketValueEur !== null ? formatPrice(lot.marketValueEur) : "—"}
                       </td>
-                      <td colSpan={3} />
+                      <td colSpan={4} />
                       <td className={cn(styles.actionsCell, styles.lotActions)}>
-                        <button
-                          type="button"
-                          className={cn(styles.action, styles.actionSell)}
-                          onClick={() => onSell(p, lot.accountId)}
-                        >
-                          Sell
-                        </button>
-                        <button
-                          type="button"
-                          className={styles.action}
-                          onClick={() => onEditLot(lot)}
-                        >
-                          Edit
-                        </button>
-                        <button
-                          type="button"
-                          className={cn(styles.action, styles.actionDanger)}
-                          onClick={() => onDeleteLot(lot)}
-                        >
-                          Delete
-                        </button>
+                        <ActionMenu
+                          label={`Actions for the ${lot.accountName} lot`}
+                          items={[
+                            { label: "Sell", accent: true, onSelect: () => onSell(p, lot.accountId) },
+                            { label: "Edit", onSelect: () => onEditLot(lot) },
+                            { label: "Delete", danger: true, onSelect: () => onDeleteLot(lot) },
+                          ]}
+                        />
                       </td>
                     </tr>
                   ))
@@ -255,7 +239,7 @@ const HoldingsTable: FC<HoldingsTableProps> = ({
                       <td className={cn(styles.num, styles.strong, profitClass(p.realizedPl))}>
                         {formatSignedPrice(p.realizedPl, currency)}
                       </td>
-                      <td colSpan={6} />
+                      <td colSpan={7} />
                       <td className={cn(styles.actionsCell, styles.lotActions)} />
                     </tr>,
                   ]
@@ -276,7 +260,7 @@ const HoldingsTable: FC<HoldingsTableProps> = ({
               <td />
               <td className={styles.num}>{formatPrice(totals.stocksEur)}</td>
               <td className={styles.num}>{formatPercent(100)}</td>
-              <td colSpan={3} />
+              <td colSpan={4} />
             </tr>
           </tfoot>
         ) : null}

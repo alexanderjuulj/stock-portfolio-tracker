@@ -1,0 +1,77 @@
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: none;
+  color: var(--clr-gray-light);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: var(--background-color);
+    color: var(--clr-gray-dark);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--clr-accent);
+    outline-offset: 0;
+  }
+}
+
+.triggerOpen {
+  background: var(--background-color);
+  color: var(--clr-gray-dark);
+}
+
+// Three vertical dots drawn with box-shadow so no icon asset is needed.
+.dots {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 -6px 0 currentColor, 0 6px 0 currentColor;
+}
+
+.menu {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  padding: 4px 0;
+  background: var(--clr-white);
+  border: 1px solid var(--background-color-secondary);
+  box-shadow: 0 8px 24px rgba(47, 74, 60, 0.16);
+}
+
+.item {
+  border: none;
+  background: none;
+  padding: 9px 16px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--clr-gray-dark);
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--background-color-secondary);
+    outline: none;
+  }
+}
+
+.itemAccent:hover,
+.itemAccent:focus-visible {
+  color: var(--clr-accent);
+}
+
+.itemDanger:hover,
+.itemDanger:focus-visible {
+  color: var(--text-clr-error);
+}

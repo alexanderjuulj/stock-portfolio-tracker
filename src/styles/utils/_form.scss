@@ -1,4 +1,4 @@
-// Shared form-styling mixins: squared corners, teal accent, dark-gray
+// Shared form-styling mixins: squared corners, green accent, dark-gray
 // bars, small bold uppercase labels.
 
 @mixin kicker {
@@ -50,7 +50,7 @@
 @mixin select-field($bg: var(--background-color-secondary)) {
   @include field($bg);
   padding-right: 40px;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%234c5c65' stroke-width='1.5'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%232f4a3c' stroke-width='1.5'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 14px center;
   cursor: pointer;
@@ -78,6 +78,10 @@
   font-weight: 700;
   transition: background-color 0.15s ease;
   text-box: trim-both cap alphabetic;
+
+  &:hover:not(:disabled) {
+    background: var(--clr-accent-strong);
+  }
 
   &:disabled {
     background: var(--clr-gray-light);
@@ -117,7 +121,7 @@
   &:hover {
     color: var(--clr-gray-dark);
     text-decoration: none;
-    background: #e7eaec;
+    background: #e3ebe5;
   }
 
   &:focus-visible {

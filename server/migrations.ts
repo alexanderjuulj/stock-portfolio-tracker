@@ -115,4 +115,10 @@ CREATE TABLE sales (
 CREATE INDEX sales_ticker_idx ON sales(ticker);
 CREATE INDEX sales_account_idx ON sales(account_id);
 `,
+
+  // 004 — previous session's close per quote, for the day-change column.
+  // Nullable: rows cached before this migration fill it on their next refresh.
+  `
+ALTER TABLE quotes ADD COLUMN previous_close REAL;
+`,
 ];

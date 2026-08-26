@@ -16,6 +16,7 @@ import {
   AccountTabs,
   HoldingForm,
   HoldingsTable,
+  SectorChart,
   SellForm,
 } from "../../components";
 import { usePortfolio } from "../../hooks";
@@ -269,6 +270,11 @@ const DashboardPage: FC = (): JSX.Element => {
           <div className={styles.tile}>
             <span className={styles.tileLabel}>Free cash</span>
             <span className={styles.tileValue}>{formatPrice(totals.cashEur)}</span>
+            {totals.cashPct !== null ? (
+              <span className={styles.tileHint} title="Share of stocks + cash">
+                {formatPercent(totals.cashPct)} of portfolio
+              </span>
+            ) : null}
           </div>
           <div className={styles.tile}>
             <span className={styles.tileLabel}>Invested</span>
@@ -359,6 +365,16 @@ const DashboardPage: FC = (): JSX.Element => {
           />
         ) : null}
       </section>
+
+      {data && data.sectors.length > 0 ? (
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <span className={styles.kicker}>Sectors</span>
+            <h2 className={styles.sectionTitle}>Where the stocks value sits</h2>
+          </div>
+          <SectorChart sectors={data.sectors} totalEur={data.totals.stocksEur} />
+        </section>
+      ) : null}
 
       {accounts.length > 0 ? (
         <section className={styles.section}>

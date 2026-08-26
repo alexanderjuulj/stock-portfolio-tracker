@@ -11,9 +11,9 @@
   --text-clr: var(--clr-gray-dark);
   --text-clr-muted: rgba(255, 255, 255, 0.45);
 
-  --text-clr-success: rgb(176, 209, 172);
-  --text-clr-pending: rgba(224, 167, 82, 1);
-  --text-clr-error: rgba(188, 82, 95, 1);
+  --text-clr-success: var(--clr-accent);
+  --text-clr-pending: var(--clr-gold);
+  --text-clr-error: #c0392b; // losses / danger, a ticker-tape red
 
   // base font size
   --fs-base: 1rem;
