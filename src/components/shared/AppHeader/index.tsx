@@ -2,6 +2,7 @@ import type { FC } from "react";
 import type { JSX } from "react/jsx-runtime";
 import { NavLink } from "react-router-dom";
 import { cn } from "@/lib/utils";
+import ThemeToggle from "../ThemeToggle";
 import styles from "./AppHeader.module.scss";
 
 const navLinkClass = ({ isActive }: { isActive: boolean }) =>
@@ -23,6 +24,7 @@ const AppHeader: FC = (): JSX.Element => (
         <NavLink to="/settings" className={navLinkClass}>
           Settings
         </NavLink>
+        <ThemeToggle />
       </nav>
     </div>
   </header>

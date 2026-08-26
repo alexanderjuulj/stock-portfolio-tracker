@@ -29,37 +29,70 @@ export function cn(...inputs: ClassValue[]): string {
   return classes.join(' ')
 }
 
+// Figures use a narrow no-break space (U+202F) between thousands and a dot
+// for decimals, whatever the locale would do: 5 123.33 €. `et-EE` gives the
+// "amount + space + currency" order and always-on grouping; the separators
+// themselves are swapped in via formatToParts.
+const GROUP = '\u202f'
+const DECIMAL = '.'
+
+function formatWithSeparators(nf: Intl.NumberFormat, value: number): string {
+  return nf
+    .formatToParts(value)
+    .map((part) => {
+      if (part.type === 'group') return GROUP
+      if (part.type === 'decimal') return DECIMAL
+      return part.value
+    })
+    .join('')
+}
+
 export function formatPrice(amount: number, currency = 'EUR'): string {
-  return new Intl.NumberFormat('et-EE', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(amount)
+  return formatWithSeparators(
+    new Intl.NumberFormat('et-EE', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 2,
+      useGrouping: 'always',
+    }),
+    amount,
+  )
 }
 
 export function formatSignedPrice(amount: number, currency = 'EUR'): string {
-  return new Intl.NumberFormat('et-EE', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-    signDisplay: 'exceptZero',
-  }).format(amount)
+  return formatWithSeparators(
+    new Intl.NumberFormat('et-EE', {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: 2,
+      signDisplay: 'exceptZero',
+      useGrouping: 'always',
+    }),
+    amount,
+  )
 }
 
 export function formatNumber(amount: number, maxFractionDigits = 2): string {
-  return new Intl.NumberFormat('et-EE', {
-    maximumFractionDigits: maxFractionDigits,
-  }).format(amount)
+  return formatWithSeparators(
+    new Intl.NumberFormat('et-EE', {
+      maximumFractionDigits: maxFractionDigits,
+      useGrouping: 'always',
+    }),
+    amount,
+  )
 }
 
-/** `value` is 0–100, not a fraction: formatPercent(12.5) → "12,50%". */
+/** `value` is 0–100, not a fraction: formatPercent(12.5) → "12.50%". */
 export function formatPercent(value: number, signed = false): string {
-  return new Intl.NumberFormat('et-EE', {
-    style: 'percent',
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-    signDisplay: signed ? 'exceptZero' : 'auto',
-  }).format(value / 100)
+  return formatWithSeparators(
+    new Intl.NumberFormat('et-EE', {
+      style: 'percent',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+      signDisplay: signed ? 'exceptZero' : 'auto',
+    }),
+    value / 100,
+  )
 }
 
 /** Today's local date as YYYY-MM-DD (for date inputs). */

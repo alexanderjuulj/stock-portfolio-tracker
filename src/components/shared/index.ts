@@ -5,3 +5,4 @@ export { default as ConfirmDialog } from "./ConfirmDialog";
 export { default as Field } from "./Field";
 export { fieldClasses } from "./Field/classes";
 export { default as FormDialog } from "./FormDialog";
+export { default as ThemeToggle } from "./ThemeToggle";

@@ -1,13 +1,3 @@
-import { useState } from "react";
-import { applyTheme, getTheme, type Theme } from "@/lib/theme";
-
-export function useTheme(): { theme: Theme; setTheme: (next: Theme) => void } {
-  const [theme, setThemeState] = useState<Theme>(getTheme);
-
-  const setTheme = (next: Theme) => {
-    applyTheme(next);
-    setThemeState(next);
-  };
-
-  return { theme, setTheme };
-}
+// The store lives in @/lib/theme so the header toggle shares it; re-exported
+// here to keep the feature's hook barrel the entry point for its pages.
+export { useTheme } from "@/lib/theme";
