@@ -1,6 +1,7 @@
 import { useState, type FC } from "react";
 import type { JSX } from "react/jsx-runtime";
 import { ConfirmDialog, Flex } from "@/components";
+import { useConcept } from "@/lib/concept";
 import { cn, formatDate, formatNumber, formatPercent, formatPrice, formatSignedPrice } from "@/lib/utils";
 import type {
   AccountInput,
@@ -16,6 +17,7 @@ import {
   AccountTabs,
   HoldingForm,
   HoldingsTable,
+  PriceForm,
   SectorChart,
   SellForm,
   TickerTape,
@@ -50,6 +52,7 @@ type Confirmation = {
 
 const DashboardPage: FC = (): JSX.Element => {
   const [accountId, setAccountId] = useState<number | null>(null);
+  const { active: conceptActive } = useConcept();
   const {
     data,
     loading,
@@ -64,6 +67,8 @@ const DashboardPage: FC = (): JSX.Element => {
     addAccount,
     editAccount,
     removeAccount,
+    setPrice,
+    clearPrice,
   } = usePortfolio(accountId);
 
   const [holdingForm, setHoldingForm] = useState<HoldingFormState | null>(null);
@@ -76,6 +81,10 @@ const DashboardPage: FC = (): JSX.Element => {
   } | null>(null);
   const [sellBusy, setSellBusy] = useState(false);
   const [sellError, setSellError] = useState<string | null>(null);
+
+  const [priceTarget, setPriceTarget] = useState<PortfolioPosition | null>(null);
+  const [priceBusy, setPriceBusy] = useState(false);
+  const [priceError, setPriceError] = useState<string | null>(null);
 
   const [accountForm, setAccountForm] = useState<{ initial: AccountSummary | null } | null>(null);
   const [accountBusy, setAccountBusy] = useState(false);
@@ -132,6 +141,28 @@ const DashboardPage: FC = (): JSX.Element => {
       .then(() => setSellTarget(null))
       .catch((err: unknown) => setSellError(errorMessage(err)))
       .finally(() => setSellBusy(false));
+  };
+
+  // ── Concept price (hand-set market price, concept mode only) ────────────
+
+  const openSetPrice = (position: PortfolioPosition) => {
+    setPriceError(null);
+    setPriceTarget(position);
+  };
+
+  const submitPrice = (price: number) => {
+    if (!priceTarget) return;
+    setPriceBusy(true);
+    setPriceError(null);
+    setPrice(priceTarget.ticker, price)
+      .then(() => setPriceTarget(null))
+      .catch((err: unknown) => setPriceError(errorMessage(err)))
+      .finally(() => setPriceBusy(false));
+  };
+
+  const resetPrice = (position: PortfolioPosition) => {
+    setActionError(null);
+    clearPrice(position.ticker).catch((err: unknown) => setActionError(errorMessage(err)));
   };
 
   // ── Account form ─────────────────────────────────────────────────────────
@@ -369,6 +400,8 @@ const DashboardPage: FC = (): JSX.Element => {
             onEditLot={openEditLot}
             onDeleteLot={confirmDeleteLot}
             onDeleteStock={confirmDeleteStock}
+            onSetPrice={conceptActive ? openSetPrice : null}
+            onClearPrice={conceptActive ? resetPrice : null}
           />
         ) : null}
       </section>
@@ -429,6 +462,17 @@ const DashboardPage: FC = (): JSX.Element => {
         onSubmit={submitSale}
         onCancel={() => {
           if (!sellBusy) setSellTarget(null);
+        }}
+      />
+
+      <PriceForm
+        open={priceTarget !== null}
+        position={priceTarget}
+        busy={priceBusy}
+        error={priceError}
+        onSubmit={submitPrice}
+        onCancel={() => {
+          if (!priceBusy) setPriceTarget(null);
         }}
       />
 

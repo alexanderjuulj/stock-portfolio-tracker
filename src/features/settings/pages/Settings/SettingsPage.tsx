@@ -1,6 +1,7 @@
 import { useRef, useState, type FC, type FormEvent } from "react";
 import type { JSX } from "react/jsx-runtime";
 import { ConfirmDialog } from "@/components";
+import { useConcept } from "@/lib/concept";
 import { cn } from "@/lib/utils";
 import { THEMES } from "@/lib/theme";
 import type { AppSettings, QuoteProvider } from "@/types/api";
@@ -144,6 +145,7 @@ const AppearanceSection: FC = (): JSX.Element => {
 
 const SettingsPage: FC = (): JSX.Element => {
   const { settings, loading, error, saving, save } = useSettings();
+  const { active: conceptActive } = useConcept();
 
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importBusy, setImportBusy] = useState(false);
@@ -192,29 +194,36 @@ const SettingsPage: FC = (): JSX.Element => {
               The whole portfolio lives in one local SQLite file. Export it for safekeeping, or
               import a previous export — importing replaces everything.
             </p>
-            <div className={styles.actions}>
-              <a className={styles.ghostButton} href="/api/export" download>
-                Export backup
-              </a>
-              <button
-                type="button"
-                className={styles.ghostButton}
-                onClick={() => fileInputRef.current?.click()}
-                disabled={importBusy}
-              >
-                Import backup…
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".db"
-                hidden
-                onChange={(e) => {
-                  setImportFile(e.target.files?.[0] ?? null);
-                  e.target.value = "";
-                }}
-              />
-            </div>
+            {conceptActive ? (
+              <p className={styles.muted}>
+                Backups work on the real portfolio, never the concept sandbox. Leave concept mode
+                to export or import.
+              </p>
+            ) : (
+              <div className={styles.actions}>
+                <a className={styles.ghostButton} href="/api/export" download>
+                  Export backup
+                </a>
+                <button
+                  type="button"
+                  className={styles.ghostButton}
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={importBusy}
+                >
+                  Import backup…
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".db"
+                  hidden
+                  onChange={(e) => {
+                    setImportFile(e.target.files?.[0] ?? null);
+                    e.target.value = "";
+                  }}
+                />
+              </div>
+            )}
             {importError ? <p className={styles.error}>{importError}</p> : null}
           </section>
         </>

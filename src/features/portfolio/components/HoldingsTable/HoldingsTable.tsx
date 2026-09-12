@@ -23,6 +23,10 @@ type HoldingsTableProps = {
   onDeleteLot: (lot: PortfolioLot) => void;
   /** Removes the stock and all of its lots. */
   onDeleteStock: (position: PortfolioPosition) => void;
+  /** Concept mode: pin a hand-set market price. Null hides the action. */
+  onSetPrice: ((position: PortfolioPosition) => void) | null;
+  /** Concept mode: drop the hand-set price. Null hides the action. */
+  onClearPrice: ((position: PortfolioPosition) => void) | null;
 };
 
 function profitClass(value: number | null): string | undefined {
@@ -38,6 +42,8 @@ const HoldingsTable: FC<HoldingsTableProps> = ({
   onEditLot,
   onDeleteLot,
   onDeleteStock,
+  onSetPrice,
+  onClearPrice,
 }): JSX.Element => {
   const [expanded, setExpanded] = useState<Set<string>>(() => new Set());
   const hasTotals = positions.some((p) => p.marketValueEur !== null);
@@ -111,7 +117,13 @@ const HoldingsTable: FC<HoldingsTableProps> = ({
                   }
                 >
                   {p.marketPrice !== null ? formatQuote(p.marketPrice, currency) : "—"}
-                  {p.quoteStale ? <span className={styles.stale}>stale</span> : null}
+                  {p.priceOverridden ? (
+                    <span className={styles.overridden} title="Concept price, set by hand">
+                      set
+                    </span>
+                  ) : p.quoteStale ? (
+                    <span className={styles.stale}>stale</span>
+                  ) : null}
                 </td>
                 <td className={cn(styles.num, styles.strong, profitClass(p.profit))}>
                   {p.profit !== null ? formatSignedPrice(p.profit, currency) : "—"}
@@ -172,6 +184,10 @@ const HoldingsTable: FC<HoldingsTableProps> = ({
                           onSell(p, p.accountCount === 1 ? p.lots[0].accountId : null),
                       },
                       { label: "Add lot", onSelect: () => onAddLot(p) },
+                      ...(onSetPrice ? [{ label: "Set price", onSelect: () => onSetPrice(p) }] : []),
+                      ...(onClearPrice && p.priceOverridden
+                        ? [{ label: "Reset price", onSelect: () => onClearPrice(p) }]
+                        : []),
                       ...(p.lots.length === 1
                         ? [{ label: "Edit", onSelect: () => onEditLot(p.lots[0]) }]
                         : []),

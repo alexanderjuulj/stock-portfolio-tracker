@@ -131,6 +131,16 @@
   color: var(--text-clr-pending);
 }
 
+// Marks a hand-set concept price, in the same amber as the header badge.
+.overridden {
+  margin-left: 6px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--clr-foil);
+}
+
 // The weight column doubles as a miniature bar chart of portfolio share.
 .weightBar {
   display: block;

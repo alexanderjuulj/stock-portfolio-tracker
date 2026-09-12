@@ -27,6 +27,8 @@ export type Quote = {
   fetchedAt: string;
   /** True when the latest refresh failed and this is an expired cache entry. */
   stale: boolean;
+  /** True when the price was set by hand (concept mode's quote_overrides). */
+  overridden: boolean;
 };
 
 export function getQuoteProvider(): QuoteProvider {
@@ -124,6 +126,55 @@ function rowToQuote(row: QuoteRow, stale: boolean): Quote {
     name: row.name,
     fetchedAt: row.fetched_at,
     stale,
+    overridden: false,
+  };
+}
+
+// ── Price overrides (concept mode) ───────────────────────────────────────────
+// A hand-set price pins the ticker: no fetching, never stale, day change
+// still computed against the cached previous close. The rows live in the
+// concept sandbox only (the API rejects writes outside it), so real-mode
+// lookups always come back empty.
+
+type OverrideRow = { ticker: string; price: number; updated_at: string };
+
+export function setQuoteOverride(ticker: string, price: number): void {
+  getDb()
+    .prepare(
+      `INSERT INTO quote_overrides (ticker, price, updated_at) VALUES (?, ?, ?)
+       ON CONFLICT(ticker) DO UPDATE SET
+         price = excluded.price, updated_at = excluded.updated_at`,
+    )
+    .run(ticker, price, new Date().toISOString());
+}
+
+export function clearQuoteOverride(ticker: string): void {
+  getDb().prepare("DELETE FROM quote_overrides WHERE ticker = ?").run(ticker);
+}
+
+function getOverrides(tickers: Iterable<string>): Map<string, OverrideRow> {
+  const select = getDb().prepare(
+    "SELECT ticker, price, updated_at FROM quote_overrides WHERE ticker = ?",
+  );
+  const overrides = new Map<string, OverrideRow>();
+  for (const ticker of tickers) {
+    const row = select.get(ticker) as OverrideRow | undefined;
+    if (row) overrides.set(ticker, row);
+  }
+  return overrides;
+}
+
+/** The cached row (if any) with the hand-set price on top. */
+function overriddenQuote(override: OverrideRow, row: QuoteRow | undefined): Quote {
+  return {
+    ticker: override.ticker,
+    price: override.price,
+    previousClose: row?.previous_close ?? null,
+    currency: row?.currency ?? null,
+    name: row?.name ?? null,
+    fetchedAt: override.updated_at,
+    stale: false,
+    overridden: true,
   };
 }
 
@@ -161,7 +212,15 @@ export async function getQuotes(
     if (row) cached.set(ticker, row);
   }
 
+  // Hand-set prices win outright — no fetch (an invented ticker would only
+  // error), no staleness.
+  const overrides = getOverrides(unique);
+  for (const [ticker, override] of overrides) {
+    quotes.set(ticker, overriddenQuote(override, cached.get(ticker)));
+  }
+
   const toFetch = unique.filter((ticker) => {
+    if (overrides.has(ticker)) return false;
     const row = cached.get(ticker);
     return force || !row || !isFresh(row.fetched_at, QUOTE_TTL_MS);
   });
@@ -187,7 +246,7 @@ export async function getQuotes(
         fetched.name,
         fetchedAt,
       );
-      quotes.set(ticker, { ticker, ...fetched, fetchedAt, stale: false });
+      quotes.set(ticker, { ticker, ...fetched, fetchedAt, stale: false, overridden: false });
     } catch (err) {
       errors.push(`${ticker}: ${err instanceof Error ? err.message : String(err)}`);
       const row = cached.get(ticker);
@@ -211,10 +270,14 @@ export function peekQuotes(tickers: string[]): Map<string, Quote> {
   const select = getDb().prepare(
     "SELECT ticker, price, previous_close, currency, name, fetched_at FROM quotes WHERE ticker = ?",
   );
+  const unique = new Set(tickers);
+  const overrides = getOverrides(unique);
   const quotes = new Map<string, Quote>();
-  for (const ticker of new Set(tickers)) {
+  for (const ticker of unique) {
     const row = select.get(ticker) as QuoteRow | undefined;
-    if (row) quotes.set(ticker, rowToQuote(row, !isFresh(row.fetched_at, QUOTE_TTL_MS)));
+    const override = overrides.get(ticker);
+    if (override) quotes.set(ticker, overriddenQuote(override, row));
+    else if (row) quotes.set(ticker, rowToQuote(row, !isFresh(row.fetched_at, QUOTE_TTL_MS)));
   }
   return quotes;
 }

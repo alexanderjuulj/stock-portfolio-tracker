@@ -1,3 +1,4 @@
+import { AsyncLocalStorage } from "node:async_hooks";
 import fs from "node:fs";
 import path from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -6,15 +7,83 @@ import { MIGRATIONS } from "./migrations";
 // Resolved against cwd: the pnpm scripts always run from the repo root.
 const DATA_DIR = path.resolve(process.cwd(), "data");
 export const DB_PATH = path.join(DATA_DIR, "rahamasin.db");
+export const CONCEPT_DB_PATH = path.join(DATA_DIR, "rahamasin.concept.db");
 
 let db: DatabaseSync | null = null;
+let conceptDb: DatabaseSync | null = null;
 
-export function getDb(): DatabaseSync {
+// ── Concept mode ─────────────────────────────────────────────────────────────
+// A sandbox: a full copy of the real database that requests carrying the
+// `x-concept` header run against, so every feature works there unchanged and
+// the real file is never written through it. Entering takes a fresh copy,
+// leaving deletes it. AsyncLocalStorage carries the per-request flag through
+// the awaits inside route handlers, so concurrent real-mode requests are
+// never misrouted.
+
+const conceptContext = new AsyncLocalStorage<boolean>();
+
+/** Run `fn` (a whole request) against the concept sandbox or the real DB. */
+export function runInConceptContext<T>(concept: boolean, fn: () => T): T {
+  return conceptContext.run(concept, fn);
+}
+
+export function inConceptContext(): boolean {
+  return conceptContext.getStore() === true;
+}
+
+function removeConceptFiles(): void {
+  for (const sidecar of ["", "-wal", "-shm"]) {
+    fs.rmSync(CONCEPT_DB_PATH + sidecar, { force: true });
+  }
+}
+
+// `VACUUM INTO` from the live connection so a WAL checkpoint can't be missing.
+function forkConceptFile(): void {
+  removeConceptFiles();
+  getRealDb().exec(`VACUUM INTO '${CONCEPT_DB_PATH.replaceAll("'", "''")}'`);
+}
+
+/** Enter concept mode: (re)create the sandbox as a fresh copy of the real DB. */
+export function startConceptMode(): void {
+  if (conceptDb) {
+    conceptDb.close();
+    conceptDb = null;
+  }
+  forkConceptFile();
+  conceptDb = openDatabase(CONCEPT_DB_PATH);
+}
+
+/** Leave concept mode: discard the sandbox and everything done in it. */
+export function stopConceptMode(): void {
+  if (conceptDb) {
+    conceptDb.close();
+    conceptDb = null;
+  }
+  removeConceptFiles();
+}
+
+function getRealDb(): DatabaseSync {
   if (!db) {
     fs.mkdirSync(DATA_DIR, { recursive: true });
     db = openDatabase(DB_PATH);
   }
   return db;
+}
+
+export function getDb(): DatabaseSync {
+  if (!inConceptContext()) return getRealDb();
+  if (!conceptDb) {
+    // Concept request without an open sandbox: reopen the file if it survived
+    // a dev-server restart, else fork a fresh copy (a missed start call).
+    if (!fs.existsSync(CONCEPT_DB_PATH)) forkConceptFile();
+    conceptDb = openDatabase(CONCEPT_DB_PATH);
+  }
+  return conceptDb;
+}
+
+/** Path of the database file the current request operates on. */
+export function activeDbPath(): string {
+  return inConceptContext() ? CONCEPT_DB_PATH : DB_PATH;
 }
 
 function openDatabase(file: string): DatabaseSync {
@@ -47,13 +116,14 @@ function migrate(d: DatabaseSync): void {
 /**
  * Write a consistent single-file snapshot of the live database and return it.
  * `VACUUM INTO` is used instead of copying the file so a WAL checkpoint can
- * never be missing from the export.
+ * never be missing from the export. Always the REAL database — backups are
+ * of real data, whatever mode the request arrived in.
  */
 export function exportSnapshot(): Buffer {
   const tmp = path.join(DATA_DIR, `.export-${process.pid}-${Date.now()}.db`);
   fs.rmSync(tmp, { force: true });
   try {
-    getDb().exec(`VACUUM INTO '${tmp.replaceAll("'", "''")}'`);
+    getRealDb().exec(`VACUUM INTO '${tmp.replaceAll("'", "''")}'`);
     return fs.readFileSync(tmp);
   } finally {
     fs.rmSync(tmp, { force: true });
@@ -91,7 +161,7 @@ export function importSnapshot(bytes: Buffer): void {
       fs.rmSync(DB_PATH + sidecar, { force: true });
     }
     fs.renameSync(tmp, DB_PATH);
-    getDb(); // reopen + migrate immediately so a bad import surfaces here
+    getRealDb(); // reopen + migrate immediately so a bad import surfaces here
   } finally {
     fs.rmSync(tmp, { force: true });
   }

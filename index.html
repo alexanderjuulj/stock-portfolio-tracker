@@ -11,11 +11,14 @@
       href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
     />
     <title>Rahamasin</title>
-    <!-- Apply the saved theme before first paint; mirrors src/lib/theme.ts. -->
+    <!-- Apply the saved theme and concept mode before first paint; mirrors
+         src/lib/theme.ts and src/lib/concept.ts. -->
     <script>
       try {
         var t = localStorage.getItem("rahamasin.theme");
         if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+        if (localStorage.getItem("rahamasin.concept") === "1")
+          document.documentElement.dataset.concept = "1";
       } catch (_) {}
     </script>
   </head>

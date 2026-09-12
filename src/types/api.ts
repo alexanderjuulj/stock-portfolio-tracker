@@ -139,6 +139,8 @@ export type PortfolioPosition = Stock & {
   quoteFetchedAt: string | null;
   /** True when the latest fetch failed and a cached price is shown instead. */
   quoteStale: boolean;
+  /** True when the market price was set by hand (concept mode only). */
+  priceOverridden: boolean;
   accountCount: number;
   lots: PortfolioLot[];
   /** Realized P/L from sales of this ticker in scope, in `currencyEffective`. */

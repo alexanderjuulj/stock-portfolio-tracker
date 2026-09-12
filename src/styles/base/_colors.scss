@@ -92,3 +92,39 @@
 :root[data-theme="light"] {
   @include day;
 }
+
+// Concept mode (`data-concept` on <html>, src/lib/concept.ts): the same desk
+// on a gray ground — night's black lifts to slate, day's paper dims to
+// graphite — so the sandbox is unmistakable at a glance. Text and signal
+// colors stay put; only the ground moves.
+@mixin night-concept {
+  --clr-paper: #1c222b;
+  --clr-paper-2: #262e39;
+  --clr-paper-3: #38424f;
+  --background-color-tertiary: #222933;
+  --clr-surface: #2b3440;
+  --clr-backdrop: rgba(14, 18, 23, 0.78);
+}
+
+@mixin day-concept {
+  --clr-paper: #e2e6eb;
+  --clr-paper-2: #d5dbe2;
+  --clr-paper-3: #bec7d1;
+  --background-color-tertiary: #dae0e6;
+  --clr-surface: #eff2f5;
+}
+
+// After the theme blocks so the concept ground wins in every theme state.
+:root[data-concept] {
+  @include night-concept;
+}
+
+@media (prefers-color-scheme: light) {
+  :root[data-concept]:not([data-theme="dark"]) {
+    @include day-concept;
+  }
+}
+
+:root[data-theme="light"][data-concept] {
+  @include day-concept;
+}

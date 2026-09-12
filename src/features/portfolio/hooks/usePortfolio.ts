@@ -80,6 +80,15 @@ export function usePortfolio(accountId: number | null) {
     (id: number) => mutate(() => portfolioApi.deleteAccount(id)),
     [mutate],
   );
+  // Concept mode only: pin / unpin a hand-set market price for a ticker.
+  const setPrice = useCallback(
+    (ticker: string, price: number) => mutate(() => portfolioApi.setQuotePrice(ticker, price)),
+    [mutate],
+  );
+  const clearPrice = useCallback(
+    (ticker: string) => mutate(() => portfolioApi.clearQuotePrice(ticker)),
+    [mutate],
+  );
 
   return {
     data,
@@ -95,5 +104,7 @@ export function usePortfolio(accountId: number | null) {
     addAccount,
     editAccount,
     removeAccount,
+    setPrice,
+    clearPrice,
   };
 }

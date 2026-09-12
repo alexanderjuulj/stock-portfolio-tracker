@@ -1,11 +1,21 @@
 import fs from "node:fs";
 import type { IncomingMessage, ServerResponse } from "node:http";
 import { createAccount, deleteAccount, parseAccountInput, updateAccount } from "./accounts";
-import { DB_PATH, exportSnapshot, getDb, importSnapshot, schemaVersion } from "./db";
+import {
+  activeDbPath,
+  exportSnapshot,
+  getDb,
+  importSnapshot,
+  inConceptContext,
+  runInConceptContext,
+  schemaVersion,
+  startConceptMode,
+  stopConceptMode,
+} from "./db";
 import { buildHistory } from "./history";
 import { createHolding, deleteHolding, parseHoldingInput, updateHolding } from "./holdings";
 import { buildPortfolio } from "./portfolio";
-import { getQuoteProvider } from "./quotes";
+import { clearQuoteOverride, getQuoteProvider, setQuoteOverride } from "./quotes";
 import { createSale, deleteSale, parseSaleInput, updateSale } from "./sales";
 import { getSetting, setSetting } from "./settings";
 import { deleteStock, normalizeTicker, parseStockInput, updateStock } from "./stocks";
@@ -78,18 +88,22 @@ function health(): HealthResponse {
     ok: true,
     sqliteVersion: v,
     schemaVersion: schemaVersion(db),
-    dbSizeBytes: fs.statSync(DB_PATH).size,
+    dbSizeBytes: fs.statSync(activeDbPath()).size,
   };
 }
 
 /**
  * Connect-style handler mounted at `/api` by the Vite plugin — the mount
  * strips the prefix, so routes here match on e.g. `/health`.
+ *
+ * A request carrying `x-concept: 1` (sent by the client while concept mode
+ * is on) runs entirely against the concept sandbox DB — see server/db.ts.
  */
-export async function handleApiRequest(
-  req: IncomingMessage,
-  res: ServerResponse,
-): Promise<void> {
+export function handleApiRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
+  return runInConceptContext(req.headers["x-concept"] === "1", () => routeRequest(req, res));
+}
+
+async function routeRequest(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const url = (req.url ?? "/").split("?")[0];
   try {
     if (req.method === "GET" && url === "/health") {
@@ -111,6 +125,10 @@ export async function handleApiRequest(
     }
 
     if (req.method === "POST" && url === "/import") {
+      if (inConceptContext()) {
+        sendJson(res, 400, { error: "Leave concept mode before importing a backup" });
+        return;
+      }
       const body = await readBody(req);
       if (body.length === 0) {
         sendJson(res, 400, { error: "Empty body — send the .db file as the request body" });
@@ -118,6 +136,23 @@ export async function handleApiRequest(
       }
       importSnapshot(body);
       sendJson(res, 200, health());
+      return;
+    }
+
+    // ── Concept mode ─────────────────────────────────────────────────────
+    // Enter forks a fresh sandbox copy of the DB, leave discards it. The
+    // active flag itself travels as the x-concept header on every request.
+
+    if (req.method === "POST" && url === "/concept") {
+      try {
+        const body = (await readJsonBody(req)) as { active?: unknown };
+        if (typeof body.active !== "boolean") throw new Error("Expected { active: boolean }");
+        if (body.active) startConceptMode();
+        else stopConceptMode();
+        sendJson(res, 200, { active: body.active });
+      } catch (err) {
+        sendJson(res, 400, { error: errorMessage(err) });
+      }
       return;
     }
 
@@ -205,6 +240,34 @@ export async function handleApiRequest(
       const id = Number(saleRoute[1]);
       if (deleteSale(id)) sendJson(res, 200, { ok: true });
       else sendJson(res, 404, { error: `No sale with id ${id}` });
+      return;
+    }
+
+    // ── Quote price overrides (concept mode only) ────────────────────────
+    // Guarded so the override table in the real DB can never gain rows.
+
+    const quoteRoute = url.match(/^\/quotes\/([^/]+)$/);
+    if (quoteRoute && (req.method === "PUT" || req.method === "DELETE")) {
+      if (!inConceptContext()) {
+        sendJson(res, 400, { error: "Prices can only be set in concept mode" });
+        return;
+      }
+      const ticker = normalizeTicker(decodeURIComponent(quoteRoute[1]));
+      if (req.method === "DELETE") {
+        clearQuoteOverride(ticker);
+        sendJson(res, 200, { ok: true });
+        return;
+      }
+      try {
+        const body = (await readJsonBody(req)) as { price?: unknown };
+        if (typeof body.price !== "number" || !Number.isFinite(body.price) || body.price <= 0) {
+          throw new Error("Price must be a positive number");
+        }
+        setQuoteOverride(ticker, body.price);
+        sendJson(res, 200, { ok: true });
+      } catch (err) {
+        sendJson(res, 400, { error: errorMessage(err) });
+      }
       return;
     }
 

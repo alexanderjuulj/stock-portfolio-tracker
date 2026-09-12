@@ -180,6 +180,7 @@ export async function buildPortfolio({ force, accountId }: PortfolioOptions): Pr
       portfolioPct: null,
       quoteFetchedAt: quote?.fetchedAt ?? null,
       quoteStale: quote?.stale ?? false,
+      priceOverridden: quote?.overridden ?? false,
       accountCount: new Set(tickerLots.map((l) => l.accountId)).size,
       lots: tickerLots,
       realizedPl,

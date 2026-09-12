@@ -1,0 +1,20 @@
+@use "@/styles/utils/form" as *;
+
+.toggle {
+  @include icon-button;
+}
+
+// Amber while the sandbox is live, matching the header badge.
+.toggleOn {
+  border-color: var(--clr-foil);
+  color: var(--clr-foil);
+
+  &:hover {
+    border-color: var(--clr-foil);
+    color: var(--clr-foil);
+  }
+}
+
+.icon {
+  display: block;
+}

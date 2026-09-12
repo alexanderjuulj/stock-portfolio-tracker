@@ -17,6 +17,24 @@
   padding: 0 32px;
 }
 
+.brandGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+// Amber chip beside the brand while concept mode is on — the sandbox has to
+// be unmistakable even before the gray ground registers.
+.conceptBadge {
+  padding: 2px 8px;
+  border: 1px solid var(--clr-foil);
+  color: var(--clr-foil);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .brand {
   display: flex;
   align-items: center;

@@ -121,4 +121,15 @@ CREATE INDEX sales_account_idx ON sales(account_id);
   `
 ALTER TABLE quotes ADD COLUMN previous_close REAL;
 `,
+
+  // 005 — hand-set market prices for concept mode. The API only accepts
+  // writes while a request runs against the concept sandbox (server/db.ts),
+  // so in the real database the table stays empty and has no effect.
+  `
+CREATE TABLE quote_overrides (
+  ticker     TEXT PRIMARY KEY,
+  price      REAL NOT NULL,
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
+);
+`,
 ];
