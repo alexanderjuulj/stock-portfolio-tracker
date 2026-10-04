@@ -181,7 +181,11 @@ const HoldingFormDialog: FC<Omit<HoldingFormProps, "open">> = ({
         </select>
       </Field>
 
-      <Field label="Amount of stocks" htmlFor="holding-quantity">
+      <Field
+        label="Amount of stocks"
+        htmlFor="holding-quantity"
+        hint={initial ? "As bought — sales are recorded separately" : undefined}
+      >
         <input
           id="holding-quantity"
           className={fieldClasses.input}

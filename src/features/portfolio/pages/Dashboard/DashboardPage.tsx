@@ -6,6 +6,7 @@ import { cn, formatDate, formatNumber, formatPercent, formatPrice, formatSignedP
 import type {
   AccountInput,
   AccountSummary,
+  Holding,
   HoldingInput,
   PortfolioLot,
   PortfolioPosition,
@@ -42,7 +43,7 @@ function signClass(value: number | null): string | undefined {
   return value >= 0 ? styles.pos : styles.neg;
 }
 
-type HoldingFormState = { initial: PortfolioLot | null; presetTicker: string | null };
+type HoldingFormState = { initial: Holding | null; presetTicker: string | null };
 type Confirmation = {
   title: string;
   message: string;
@@ -110,9 +111,22 @@ const DashboardPage: FC = (): JSX.Element => {
     setHoldingError(null);
     setHoldingForm({ initial: null, presetTicker: position.ticker });
   };
+  // The form edits the purchase itself, so it gets the quantity as bought —
+  // a lot's `quantity` on the dashboard is what is left after sales.
   const openEditLot = (lot: PortfolioLot) => {
     setHoldingError(null);
-    setHoldingForm({ initial: lot, presetTicker: null });
+    setHoldingForm({
+      initial: {
+        id: lot.id,
+        ticker: lot.ticker,
+        accountId: lot.accountId,
+        quantity: lot.boughtQuantity,
+        purchasePrice: lot.purchasePrice,
+        purchasedAt: lot.purchasedAt,
+        cashDebited: lot.cashDebited,
+      },
+      presetTicker: null,
+    });
   };
 
   const submitHolding = (input: HoldingInput) => {
