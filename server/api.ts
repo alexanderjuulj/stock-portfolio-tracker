@@ -181,7 +181,7 @@ async function routeRequest(req: IncomingMessage, res: ServerResponse): Promise<
 
     if (req.method === "POST" && url === "/holdings") {
       try {
-        sendJson(res, 201, createHolding(parseHoldingInput(await readJsonBody(req))));
+        sendJson(res, 201, await createHolding(parseHoldingInput(await readJsonBody(req))));
       } catch (err) {
         sendJson(res, 400, { error: errorMessage(err) });
       }
@@ -203,7 +203,7 @@ async function routeRequest(req: IncomingMessage, res: ServerResponse): Promise<
     if (holdingRoute && req.method === "PUT") {
       const id = Number(holdingRoute[1]);
       try {
-        const updated = updateHolding(id, parseHoldingInput(await readJsonBody(req)));
+        const updated = await updateHolding(id, parseHoldingInput(await readJsonBody(req)));
         if (updated) sendJson(res, 200, updated);
         else sendJson(res, 404, { error: `No holding with id ${id}` });
       } catch (err) {

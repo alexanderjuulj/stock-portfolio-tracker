@@ -6,12 +6,14 @@
 
 // Amber while the sandbox is live, matching the header badge.
 .toggleOn {
-  border-color: var(--clr-foil);
-  color: var(--clr-foil);
+  border-color: var(--clr-concept);
+  background: var(--clr-concept);
+  color: var(--clr-on-concept);
 
   &:hover {
-    border-color: var(--clr-foil);
-    color: var(--clr-foil);
+    border-color: var(--clr-concept);
+    background: var(--clr-concept);
+    color: var(--clr-on-concept);
   }
 }
 

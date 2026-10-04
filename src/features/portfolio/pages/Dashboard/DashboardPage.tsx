@@ -97,6 +97,7 @@ const DashboardPage: FC = (): JSX.Element => {
   const accounts = data?.accounts ?? [];
   const positions = data?.positions ?? [];
   const totals = data?.totals ?? null;
+  const quoteCurrencies = Object.fromEntries(positions.map((p) => [p.ticker, p.currencyEffective]));
   const scopedAccount = accountId === null ? null : accounts.find((a) => a.id === accountId) ?? null;
 
   // ── Holding (lot) form ───────────────────────────────────────────────────
@@ -442,6 +443,9 @@ const DashboardPage: FC = (): JSX.Element => {
         defaultAccountId={accountId}
         accounts={accounts}
         stocks={data?.stocks ?? []}
+        quoteCurrencies={quoteCurrencies}
+        fxRates={data?.fxRates ?? {}}
+        payFromCashByDefault={conceptActive}
         busy={holdingBusy}
         error={holdingError}
         onSubmit={submitHolding}

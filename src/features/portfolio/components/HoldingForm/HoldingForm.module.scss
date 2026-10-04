@@ -1,0 +1,23 @@
+// "Pay from free cash" — same look as the Sell form's "add proceeds" option.
+.checkbox {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 0.9375rem;
+  color: var(--clr-gray-dark);
+  cursor: pointer;
+
+  input {
+    margin-top: 4px;
+    accent-color: var(--clr-accent);
+  }
+}
+
+.checkboxNote {
+  color: var(--clr-gray-light);
+}
+
+.neg {
+  color: var(--text-clr-error);
+}

@@ -81,6 +81,7 @@ export async function buildPortfolio({ force, accountId }: PortfolioOptions): Pr
       boughtQuantity: lot.quantity,
       purchasePrice: lot.purchasePrice,
       purchasedAt: lot.purchasedAt,
+      cashDebited: lot.cashDebited,
       marketValue,
       marketValueEur,
       profit,

@@ -93,25 +93,30 @@
   @include day;
 }
 
-// Concept mode (`data-concept` on <html>, src/lib/concept.ts): the same desk
-// on a gray ground — night's black lifts to slate, day's paper dims to
-// graphite — so the sandbox is unmistakable at a glance. Text and signal
-// colors stay put; only the ground moves.
+// Concept mode (`data-concept` on <html>, src/lib/concept.ts): the desk
+// turns violet — a "blueprint" ground no real portfolio view ever uses — and
+// gets an amber banner, badge and viewport frame (`--clr-concept`, the same
+// amber in both themes with near-black text on it). Text and gain/loss
+// colors stay put; only the ground and the concept chrome change.
 @mixin night-concept {
-  --clr-paper: #1c222b;
-  --clr-paper-2: #262e39;
-  --clr-paper-3: #38424f;
-  --background-color-tertiary: #222933;
-  --clr-surface: #2b3440;
-  --clr-backdrop: rgba(14, 18, 23, 0.78);
+  --clr-paper: #15102a;
+  --clr-paper-2: #211a3d;
+  --clr-paper-3: #3a2f63;
+  --background-color-tertiary: #1b1534;
+  --clr-surface: #261e47;
+  --clr-backdrop: rgba(10, 7, 22, 0.78);
+  --clr-concept: #f2b53f;
+  --clr-on-concept: #101720; // 9.9:1
 }
 
 @mixin day-concept {
-  --clr-paper: #e2e6eb;
-  --clr-paper-2: #d5dbe2;
-  --clr-paper-3: #bec7d1;
-  --background-color-tertiary: #dae0e6;
-  --clr-surface: #eff2f5;
+  --clr-paper: #efeafb;
+  --clr-paper-2: #e3dbf6;
+  --clr-paper-3: #c6b9e8;
+  --background-color-tertiary: #e8e1f8;
+  --clr-surface: #f9f7fe;
+  --clr-concept: #f2b53f;
+  --clr-on-concept: #101720;
 }
 
 // After the theme blocks so the concept ground wins in every theme state.

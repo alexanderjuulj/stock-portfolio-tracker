@@ -3,7 +3,7 @@
 // proceeds — converted to the account's currency — to its free cash. Deleting
 // or editing a sale reverts / re-applies that credit.
 
-import { getDb } from "./db";
+import { getDb, inTransaction } from "./db";
 import { availableQuantity, listHoldings, listSales, QTY_EPSILON } from "./ledger";
 import { getFxToEur, getQuotes } from "./quotes";
 import { getStock, normalizeTicker } from "./stocks";
@@ -81,19 +81,6 @@ function assertAvailable(input: SaleInput, excludeSaleId: number | null, account
         ? `Only ${formatQuantity(available)} ${input.ticker} shares are held in ${accountName} on ${input.soldAt}`
         : `No ${input.ticker} shares are held in ${accountName} on ${input.soldAt}`,
     );
-  }
-}
-
-function inTransaction<T>(fn: () => T): T {
-  const db = getDb();
-  db.exec("BEGIN");
-  try {
-    const result = fn();
-    db.exec("COMMIT");
-    return result;
-  } catch (err) {
-    db.exec("ROLLBACK");
-    throw err;
   }
 }
 

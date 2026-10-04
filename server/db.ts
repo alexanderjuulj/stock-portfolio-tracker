@@ -81,6 +81,20 @@ export function getDb(): DatabaseSync {
   return conceptDb;
 }
 
+/** Runs `fn` in one transaction on the current request's database. */
+export function inTransaction<T>(fn: () => T): T {
+  const d = getDb();
+  d.exec("BEGIN");
+  try {
+    const result = fn();
+    d.exec("COMMIT");
+    return result;
+  } catch (err) {
+    d.exec("ROLLBACK");
+    throw err;
+  }
+}
+
 /** Path of the database file the current request operates on. */
 export function activeDbPath(): string {
   return inConceptContext() ? CONCEPT_DB_PATH : DB_PATH;

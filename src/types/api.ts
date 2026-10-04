@@ -54,9 +54,13 @@ export type Holding = {
   purchasePrice: number;
   /** Purchase date as YYYY-MM-DD, or null when unknown. */
   purchasedAt: string | null;
+  /** Taken from the account's free cash when bought (account currency); null if not paid from it. */
+  cashDebited: number | null;
 };
 
-export type HoldingInput = Omit<Holding, "id"> & {
+export type HoldingInput = Omit<Holding, "id" | "cashDebited"> & {
+  /** Pay quantity × price, converted to the account's currency, from its free cash. */
+  debitCash?: boolean;
   /**
    * Stock-level fields saved together with the lot. They are shared by every
    * lot of the ticker, so this updates the existing stock record (or creates

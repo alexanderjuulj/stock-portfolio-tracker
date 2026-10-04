@@ -36,6 +36,7 @@ type LotRow = {
   quantity: number;
   purchase_price: number;
   purchased_at: string | null;
+  cash_debited: number | null;
 };
 
 type SaleRow = {
@@ -56,7 +57,7 @@ export function listHoldings(): HoldingWithAccount[] {
   const rows = getDb()
     .prepare(
       `SELECT h.id, h.ticker, h.account_id, a.name AS account_name,
-              h.quantity, h.purchase_price, h.purchased_at
+              h.quantity, h.purchase_price, h.purchased_at, h.cash_debited
        FROM holdings h JOIN accounts a ON a.id = h.account_id
        ORDER BY h.ticker, a.name COLLATE NOCASE, h.purchased_at, h.id`,
     )
@@ -69,6 +70,7 @@ export function listHoldings(): HoldingWithAccount[] {
     quantity: row.quantity,
     purchasePrice: row.purchase_price,
     purchasedAt: row.purchased_at,
+    cashDebited: row.cash_debited,
   }));
 }
 

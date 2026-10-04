@@ -23,16 +23,32 @@
   gap: 12px;
 }
 
-// Amber chip beside the brand while concept mode is on — the sandbox has to
-// be unmistakable even before the gray ground registers.
+// Solid amber block beside the brand while concept mode is on — with the
+// banner below, the violet ground and the viewport frame, the sandbox can't
+// be mistaken for the real portfolio.
 .conceptBadge {
-  padding: 2px 8px;
-  border: 1px solid var(--clr-foil);
-  color: var(--clr-foil);
-  font-size: 0.625rem;
-  font-weight: 600;
+  padding: 3px 8px;
+  background: var(--clr-concept);
+  color: var(--clr-on-concept);
+  font-size: 0.6875rem;
+  font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.conceptBanner {
+  padding: 6px 32px;
+  background: var(--clr-concept);
+  color: var(--clr-on-concept);
+  font-size: 0.8125rem;
+  text-align: center;
+
+  strong {
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-right: 8px;
+  }
 }
 
 .brand {

@@ -132,4 +132,11 @@ CREATE TABLE quote_overrides (
   updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))
 );
 `,
+
+  // 006 — what buying a lot took out of the account's free cash (account
+  // currency), so editing or deleting the lot can give it back. Null when the
+  // purchase wasn't paid from free cash (every lot recorded before this).
+  `
+ALTER TABLE holdings ADD COLUMN cash_debited REAL;
+`,
 ];

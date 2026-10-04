@@ -40,6 +40,17 @@ body {
   }
 }
 
+// Concept mode: an amber frame around the whole viewport, above everything
+// (dialogs included) but never in the way of a click.
+:root[data-concept] body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  border: 3px solid var(--clr-concept);
+  pointer-events: none;
+}
+
 // Accessibility: Visible focus indicators for keyboard navigation
 // Only shows focus ring when using keyboard (not mouse clicks)
 *:focus-visible {

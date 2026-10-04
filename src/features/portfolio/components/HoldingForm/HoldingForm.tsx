@@ -1,9 +1,11 @@
 import { useState, type FC } from "react";
 import type { JSX } from "react/jsx-runtime";
 import { Field, FormDialog, fieldClasses } from "@/components";
+import { formatPrice } from "@/lib/utils";
 import type { Account, Holding, HoldingInput, Stock } from "@/types/api";
 import CurrencySelect from "../CurrencySelect/CurrencySelect";
 import SectorSelect from "../SectorSelect/SectorSelect";
+import styles from "./HoldingForm.module.scss";
 
 // Accepts both "1234.56" and the Danish-keyboard "1234,56".
 function parseDecimal(value: string): number {
@@ -21,6 +23,12 @@ type HoldingFormProps = {
   accounts: Account[];
   /** Every stock on record — drives ticker suggestions and sector/notes prefill. */
   stocks: Stock[];
+  /** Trading currency the quote reports, per ticker — wins over the stock's fallback. */
+  quoteCurrencies?: Record<string, string>;
+  /** EUR per unit, for previewing the cost in the account's currency. */
+  fxRates?: Record<string, number>;
+  /** Whether a new lot is paid from free cash unless unticked (on in concept mode). */
+  payFromCashByDefault?: boolean;
   busy: boolean;
   /** Submission error from the server. */
   error: string | null;
@@ -34,6 +42,9 @@ const HoldingFormDialog: FC<Omit<HoldingFormProps, "open">> = ({
   defaultAccountId = null,
   accounts,
   stocks,
+  quoteCurrencies = {},
+  fxRates = {},
+  payFromCashByDefault = false,
   busy,
   error,
   onSubmit,
@@ -54,11 +65,32 @@ const HoldingFormDialog: FC<Omit<HoldingFormProps, "open">> = ({
   const [currency, setCurrency] = useState(startStock?.currency ?? "USD");
   const [notes, setNotes] = useState(startStock?.notes ?? "");
   const [prefilledFrom, setPrefilledFrom] = useState<string | null>(startStock?.ticker ?? null);
+  const [debitCash, setDebitCash] = useState(initial ? initial.cashDebited !== null : payFromCashByDefault);
   const [validationError, setValidationError] = useState<string | null>(null);
 
   const normalizedTicker = ticker.trim().toUpperCase();
   const matchedStock = stocks.find((s) => s.ticker === normalizedTicker) ?? null;
   const knownSectors = [...new Set(stocks.map((s) => s.sector))];
+
+  // Cost preview in the account's currency, mirroring server/holdings.ts.
+  const account = accounts.find((a) => a.id === Number(accountId)) ?? null;
+  const tradingCurrency = quoteCurrencies[normalizedTicker] ?? currency;
+  const quantityValue = parseDecimal(quantity);
+  const priceValue = parseDecimal(purchasePrice);
+  const cost =
+    quantity.trim() !== "" && purchasePrice.trim() !== "" && quantityValue > 0 && priceValue >= 0
+      ? quantityValue * priceValue
+      : null;
+  let cashDebit: number | null = null;
+  if (cost !== null && account) {
+    const from = fxRates[tradingCurrency];
+    const to = fxRates[account.currency];
+    if (tradingCurrency === account.currency) cashDebit = cost;
+    else if (from !== undefined && to !== undefined) cashDebit = (cost * from) / to;
+  }
+  // The account's cash already reflects what this lot took when it was saved.
+  const refunded = initial && initial.accountId === account?.id ? (initial.cashDebited ?? 0) : 0;
+  const cashLeft = account && cashDebit !== null ? account.cash + refunded - cashDebit : null;
 
   const changeTicker = (value: string) => {
     setTicker(value);
@@ -72,8 +104,6 @@ const HoldingFormDialog: FC<Omit<HoldingFormProps, "open">> = ({
   };
 
   const submit = () => {
-    const quantityValue = parseDecimal(quantity);
-    const priceValue = parseDecimal(purchasePrice);
     const accountValue = Number(accountId);
     if (!normalizedTicker) {
       setValidationError("Ticker is required");
@@ -99,6 +129,7 @@ const HoldingFormDialog: FC<Omit<HoldingFormProps, "open">> = ({
       purchasePrice: priceValue,
       purchasedAt: purchasedAt || null,
       stock: { sector: sector.trim(), currency, notes: notes.trim() },
+      debitCash,
     });
   };
 
@@ -214,6 +245,21 @@ const HoldingFormDialog: FC<Omit<HoldingFormProps, "open">> = ({
           rows={3}
         />
       </Field>
+
+      <label className={styles.checkbox}>
+        <input type="checkbox" checked={debitCash} onChange={(e) => setDebitCash(e.target.checked)} />
+        <span>
+          Pay from {account?.name || "the account"}&apos;s free cash
+          {debitCash && account && cashDebit !== null && cashLeft !== null ? (
+            <span className={styles.checkboxNote}>
+              {" "}
+              · {tradingCurrency === account.currency ? "" : "≈ "}
+              {formatPrice(cashDebit, account.currency)} · leaves{" "}
+              <span className={cashLeft < 0 ? styles.neg : undefined}>{formatPrice(cashLeft, account.currency)}</span>
+            </span>
+          ) : null}
+        </span>
+      </label>
     </FormDialog>
   );
 };

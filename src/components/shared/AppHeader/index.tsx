@@ -16,6 +16,12 @@ const AppHeader: FC = (): JSX.Element => {
 
   return (
     <header className={styles.header}>
+      {conceptActive ? (
+        <div className={styles.conceptBanner} role="status">
+          <strong>Concept mode</strong>
+          What-if sandbox — nothing here touches your real portfolio, and leaving discards it.
+        </div>
+      ) : null}
       <div className={styles.inner}>
         <div className={styles.brandGroup}>
           <NavLink to="/" className={styles.brand}>
